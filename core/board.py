@@ -1,15 +1,38 @@
 class Tablero:
-    def __init__(self, ):
-        self.__contenedor__ = [0]*24
-        self.__contenedor__[0] = -2
-        self.__contenedor__[11] = -5
-        self.__contenedor__[16] = -3
-        self.__contenedor__[18] = -5
-        self.__contenedor__[23] = 2
-        self.__contenedor__[12] = 5
-        self.__contenedor__[7] = 3
-        self.__contenedor__[5] = 5
-    def guardar_ficha(self, ):
-        ...
-    def get_contenedor(self, ):
+    def __init__(self):
+         # 24 posiciones del tablero, cada una lista de fichas
+        self.__contenedor__ = [[] for _ in range(24)]
+
+        # Posiciones iniciales estándar del Backgammon
+        # Blancas
+        self.__contenedor__[0] = ["negra"]*2
+        self.__contenedor__[11] = ["negra"]*5
+        self.__contenedor__[16] = ["negra"]*3
+        self.__contenedor__[18] = ["negra"]*5
+
+        # Negras
+        self.__contenedor__[23] = ["blanca"]*2
+        self.__contenedor__[12] = ["blanca"]*5
+        self.__contenedor__[7] = ["blanca"]*3
+        self.__contenedor__[5] = ["blanca"]*5
+    
+    def quitar_ficha(self, posicion):
+        # Saca una ficha de la posición indicada
+        if self.__contenedor__[posicion]:
+            return self.__contenedor__[posicion].pop()
+        return None
+    
+    def get_contenedor(self):
+        # Muestra el contenedor
         return self.__contenedor__
+    
+    def mover_ficha(self, origen, destino):
+        # Mueve una ficha desde `origen` a `destino` (si es posible).
+        if not self.__contenedor__[origen]:
+            raise ValueError("No hay fichas en la posición de origen")
+        # Elimina una ficha
+        ficha = self.__contenedor__[origen].pop()
+        # Guarda una ficha
+        self.__contenedor__[destino].append(ficha)
+
+
