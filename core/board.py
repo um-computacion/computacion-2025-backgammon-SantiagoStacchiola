@@ -34,5 +34,14 @@ class Tablero:
         ficha = self.__contenedor__[origen].pop()
         # Guarda una ficha
         self.__contenedor__[destino].append(ficha)
+    
+    def puede_sacar_fichas(self, color):
+         # Verifica si todas las fichas del jugador están en su último cuadrante.
+        if color == "blanca":
+        # blancas en posiciones 18–23
+            return all(ficha == "blanca" for i in range(18, 24) for ficha in self.__contenedor__[i])
+        else:
+        # negras en posiciones 0–5
+            return all(ficha == "negra" for i in range(0, 6) for ficha in self.__contenedor__[i])
 
 
