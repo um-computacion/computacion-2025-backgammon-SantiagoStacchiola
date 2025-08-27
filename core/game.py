@@ -24,9 +24,18 @@ class BackgammonGame:
         return self.__turno__
     
     def cambiar_turno(self):
-        ...
+        # Pasa el turno al otro jugador
+        if self.__turno__ == self.__jugador_blancas__:
+            self.__turno__ = self.__jugador_negras__
+        else:
+            self.__turno__ = self.__jugador_blancas__
 
     def verificar_victoria(self):
-        ...    
+        # Verifica si el jugador gano
+        color = self.__turno__.get_color()
+        if self.__tablero__.puede_sacar_fichas(color):
+            # condición simplificada: todas fuera
+            return True
+        return False  
 
 
