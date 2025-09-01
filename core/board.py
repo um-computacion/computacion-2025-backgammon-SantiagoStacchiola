@@ -53,8 +53,12 @@ class Tablero:
         ficha = self.__contenedor__[origen].pop()
         self.__contenedor__[destino].append(ficha)
     
-    def enviar_a_barra(self):
-        ...
+    def enviar_a_barra(self, color):
+        # Manda una ficha capturada a la barra correspondiente
+        if color == "blanca":
+            self.__barra_blancas__.append(color)
+        else:
+            self.__barra_negras__.append(color)
     
     def reingrasar_desde_barra(self):
         ...
