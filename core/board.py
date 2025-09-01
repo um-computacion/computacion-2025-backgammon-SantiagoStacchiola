@@ -1,4 +1,4 @@
-class Tablero:
+class Board:
     def __init__(self):
          # 24 posiciones del tablero, cada una lista de fichas
         self.__contenedor__ = [[] for _ in range(24)]
@@ -24,7 +24,7 @@ class Tablero:
         # Muestra el contenedor
         return self.__contenedor__
 
-    def get_fichas(self, posicion)
+    def get_fichas(self, posicion):
         # devuelve una copia de las fichas en una posicion
         return list(self.__contenedor__[posicion])
 
@@ -65,7 +65,7 @@ class Tablero:
     
     def fichas_en_barra(self):
         ...
-
+        
     def sacar_ficha(self, posicion):
         #Saca una ficha del tablero
         return self.quitar_ficha(posicion)

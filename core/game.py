@@ -1,11 +1,11 @@
-from core.board import Tablero
+from core.board import Board
 from core.dice import Dice
 from core.player import Player
 
 class BackgammonGame:
     def __init__(self):
         # Tablero y lógica central
-        self.__tablero__ = Tablero()
+        self.__tablero__ = Board()
         self.__dado__ = Dice()
 
         # Jugadores
@@ -93,8 +93,7 @@ class BackgammonGame:
 
     def verificar_victoria(self):
         # Verifica si el jugador gano
-        color = self.__turno__.get_color()
-        return self.__tablero__.puede_sacar_fichas(color)
+        return self.__turno__.fichas_restantes() == 0
 
 
 
