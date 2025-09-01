@@ -22,6 +22,9 @@ class Dice:
         # Devuelve los valores de los dados
         return self.__valores__
     
+    def set_valores(self, valores):
+        self.__valores__ = valores
+    
     def usar_valor(self, valor):
         # Consume un valor de la tirada si está disponible
         if valor in self.__valores__:
