@@ -60,11 +60,14 @@ class Board:
         else:
             self.__barra_negras__.append(color)
     
-    def reingrasar_desde_barra(self):
-        ...
+    def reingresar_desde_barra(self, color, destino):
+        if color == "blanca" and self.__barra_blancas__:
+            self.__contenedor__[destino].append(self.__barra_blancas__.pop())
+        elif color == "negra" and self.__barra_negras__:
+            self.__contenedor__[destino].append(self.__barra_negras__.pop())
     
-    def fichas_en_barra(self):
-        ...
+    def fichas_en_barra(self, color):
+        return len(self.__barra_blancas__ if color == "blanca" else self.__barra_negras__)
         
     def sacar_ficha(self, posicion):
         #Saca una ficha del tablero

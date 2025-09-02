@@ -24,4 +24,9 @@ class TestBoard(unittest.TestCase):
         self.assertEqual(b.contar_fichas(destino), 1)
 
     def test_barra_y_reingreso(self):
-        ...
+        b = Board()
+        b.enviar_a_barra("blanca")
+        self.assertEqual(b.fichas_en_barra("blanca"), 1)
+        b.reingresar_desde_barra("blanca", 2)
+        self.assertEqual(b.contar_fichas(2), 1)
+        self.assertEqual(b.fichas_en_barra("blanca"), 0)
