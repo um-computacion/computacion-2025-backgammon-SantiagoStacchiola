@@ -86,6 +86,15 @@ class TestGame(unittest.TestCase):
         g.cambiar_turno()
         self.assertNotEqual(g.get_turno(), turno_inicial)
 
+    def test_cambiar_turno_dos_veces(self):
+        g = BackgammonGame()
+        turno_inicial = g.get_turno()
+        g.cambiar_turno()
+        turno_segundo = g.get_turno()
+        g.cambiar_turno()
+        turno_tercero = g.get_turno()
+        self.assertEqual(turno_tercero, turno_inicial)
+
     def test_quedan_movimientos(self):
         g = BackgammonGame()
         g.tirar_dados()

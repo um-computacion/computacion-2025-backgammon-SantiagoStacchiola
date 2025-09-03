@@ -16,6 +16,37 @@ class TestBoard(unittest.TestCase):
         self.assertEqual(ficha, "blanca")
         self.assertEqual(b.contar_fichas(5), 5)
 
+    def test_color_en_posicion_vacia(self):
+        b = Board()
+        # Vacía la posición 3
+        b.get_contenedor()[3] = []
+        self.assertIsNone(b.color_en_posicion(3))
+
+    def test_color_en_posicion_con_fichas(self):
+        b = Board()
+        b.get_contenedor()[5] = ["blanca", "blanca"]
+        self.assertEqual(b.color_en_posicion(5), "blanca")
+
+    def test_quitar_ficha_vacia(self):
+        b = Board()
+        # Vacía la posición 4
+        b.get_contenedor()[4] = []
+        self.assertIsNone(b.quitar_ficha(4))
+
+    def test_reingresar_desde_barra_sin_fichas(self):
+        b = Board()
+        # No hay fichas en la barra
+        b.reingresar_desde_barra("blanca", 10)
+        self.assertEqual(b.contar_fichas(10), 0)
+        b.reingresar_desde_barra("negra", 15)
+        self.assertEqual(b.contar_fichas(15), 0)
+
+    def test_sacar_ficha_vacia(self):
+        b = Board()
+        # Vacía la posición 8
+        b.get_contenedor()[8] = []
+        self.assertIsNone(b.sacar_ficha(8))
+
     def test_mover_ficha(self):
         b = Board()
         origen, destino = 0, 1

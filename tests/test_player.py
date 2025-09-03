@@ -14,8 +14,17 @@ class TestPlayer(unittest.TestCase):
         p.sacar_de_barra()
         self.assertEqual(p.fichas_en_barra(), 0)
 
+    def test_barra_devuelve_none(self):
+        p = Player("negra")
+        p.sacar_de_barra() 
+        self.assertEqual(p.sacar_de_barra(), None)
+
     def test_fichas_fuera_y_restantes(self):
         p = Player("blanca")
         p.sacar_del_tablero()
         self.assertEqual(p.fichas_fuera(), 1)
         self.assertEqual(p.fichas_restantes(), 14)
+
+    def test_color_invalido(self):
+        with self.assertRaises(ValueError):
+            Player("verde")
