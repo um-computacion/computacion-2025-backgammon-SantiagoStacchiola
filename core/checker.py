@@ -18,3 +18,8 @@ class Ficha:
     def esta_en_barra(self):
         return self.__posicion__ == "barra"
 
+    def esta_afuera(self):
+        return self.__posicion__ == "afuera"
+
+    def __repr__(self):
+        return f"Ficha({self.__color__}, pos={self.__posicion__})"
