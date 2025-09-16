@@ -11,4 +11,10 @@ class Ficha:
     def obtener_posicion(self):
         return self.__posicion__
     
+    def mover(self, nueva_posicion):
+        #Cambia la posición de la ficha
+        self.__posicion__ = nueva_posicion
     
+    def esta_en_barra(self):
+        return self.__posicion__ == "barra"
+
