@@ -1,3 +1,5 @@
+from core.checker import Ficha
+
 class Player:
     def __init__(self, color: str):
         if color not in ["blanca", "negra"]:
@@ -15,22 +17,23 @@ class Player:
     def get_total_fichas(self):
         return self.__total_fichas__
 
-    def enviar_a_barra(self):
-        # Agrega una ficha a la barra
-        self.__barra__.append(self.__color__)
+    def enviar_a_barra(self, ficha: Ficha):
+        ficha.mover("barra")
+        self.__barra__.append(ficha)
     
     def sacar_de_barra(self):
-        # Saca una ficha de la barra (si existe)
         if self.__barra__:
-            return self.__barra__.pop()
+            ficha = self.__barra__.pop()
+            ficha.mover(None)
+            return ficha
         return None
     
     def fichas_en_barra(self):
         return len(self.__barra__)
 
-    def sacar_del_tablero(self):
-        # Agrega una ficha a la zona de fichas fuera
-        self.__fuera__.append(self.__color__)
+    def sacar_del_tablero(self, ficha: Ficha):
+        ficha.mover("afuera")
+        self.__fuera__.append(ficha)
 
     def fichas_fuera(self):
         return len(self.__fuera__)
