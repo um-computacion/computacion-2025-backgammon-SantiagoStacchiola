@@ -21,4 +21,12 @@ class TestFicha(unittest.TestCase):
         self.assertTrue(f.esta_en_barra())
         self.assertFalse(f.esta_afuera())
 
-    
+    def test_ficha_afuera(self):
+        f = Ficha("negra", "afuera")
+        self.assertTrue(f.esta_afuera())
+        self.assertFalse(f.esta_en_barra())
+
+    def test_repr(self):
+        f = Ficha("blanca", 3)
+        self.assertIn("blanca", repr(f))
+        self.assertIn("3", repr(f))
