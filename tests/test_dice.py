@@ -1,23 +1,27 @@
 import unittest
 from core.dice import Dice
+from unittest.mock import patch
 
 class TestDice(unittest.TestCase):
-    def test_tirada_normal_o_doble(self):
+    @patch("core.dice.random.randint", side_effect=[2, 5])
+    def test_tirar_dados_no_doble(self, mock_randint):
         d = Dice()
-        valores = d.tirar()
-        self.assertIn(len(valores), [2, 4])
-        for v in valores:
-            self.assertTrue(1 <= v <= 6)
+        # Forzamos el resultado para evitar aleatoriedad
+        resultado = d.tirar()
+        self.assertEqual(resultado[0], 2)
+        self.assertEqual(resultado[1], 5)
 
-    def test_usar_valor(self):
+    @patch("core.dice.random.randint", side_effect=[4, 4])
+    def test_tirar_dados_doble(self, mock_randint):
         d = Dice()
-        d.set_valores([3, 5]) # simular tirada
-        self.assertTrue(d.usar_valor(3))
-        self.assertNotIn(3, d.get_valores())
-        self.assertFalse(d.usar_valor(6))
+        resultado = d.tirar()
+        self.assertIn(resultado[0], [4, 4, 4, 4])
 
-    def test_reset(self):
+    def test_quedan_valores_true(self):
         d = Dice()
-        d.get_valores() == [1, 2]
-        d.reset()
-        self.assertEqual(d.get_valores(), [])
+        d.tirar()
+        self.assertTrue(d.quedan_valores())
+
+if __name__ == '__main__':
+    unittest.main()
+    

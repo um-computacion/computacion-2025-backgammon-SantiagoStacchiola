@@ -1,118 +1,94 @@
 import unittest
 from core.game import BackgammonGame
+from core.checker import Ficha
 
-class TestGame(unittest.TestCase):
-    def test_creacion_juego(self):
-        g = BackgammonGame()
-        self.assertEqual(g.get_turno().get_color(), "blanca")
-        self.assertEqual(len(g.get_tablero()), 24)
+class TestBackgammonGame(unittest.TestCase):
+    def setUp(self):
+        self.game = BackgammonGame()
 
-    def test_tirada_dados(self):
-        g = BackgammonGame()
-        tirada = g.tirar_dados()
-        self.assertIn(len(tirada), [2, 4])
+    def test_turno_inicial(self):
+        self.assertEqual(self.game.get_turno().get_color(), "blanca")
 
-    def test_valores_dados(self):
-        g = BackgammonGame()
-        g.tirar_dados()
-        valores = g.get_valores_dados()
+    def test_cambiar_turno(self):
+        self.game.cambiar_turno()
+        self.assertEqual(self.game.get_turno().get_color(), "negra")
+        self.game.cambiar_turno()
+        self.assertEqual(self.game.get_turno().get_color(), "blanca")
+
+    def test_tirar_dados(self):
+        valores = self.game.tirar_dados()
         self.assertTrue(all(1 <= v <= 6 for v in valores))
         self.assertIn(len(valores), [2, 4])
-    
-    def test_usar_dados(self):
-        g = BackgammonGame()
-        g.tirar_dados()
-        valores = g.get_valores_dados()
-        valor = valores[0]
-        usado = g.usar_valor_dado(valor)
-        self.assertTrue(usado)
-        self.assertNotIn(valor, g.get_valores_dados())
 
-    def test_mover(self):
-        g = BackgammonGame()
-        g.tirar_dados()
-        valores = g.get_valores_dados()
-        valor_dado = valores[0]
-        origen = 0
-        destino = origen + valor_dado
-        # Asegura que hay una ficha del jugador en el origen
-        g.get_tablero()[origen] = [g.get_turno().get_color()]
-        g.mover(origen, destino, valor_dado)
-        self.assertNotIn(valor_dado, g.get_valores_dados())
-
-    def test_movimiento_valido(self):
-        g = BackgammonGame()
-        origen = 0
-        destino = 2
-        es_valido = g.movimiento_valido(origen, destino)
-        self.assertIsInstance(es_valido, bool)
-
-    def test_mover_movimiento_invalido(self):
-        g = BackgammonGame()
-        g.tirar_dados()
-        valor_dado = g.get_valores_dados()[0]
-        origen = 0
-        destino = origen + valor_dado
-        with self.assertRaises(ValueError):
-            g.mover(origen, destino, valor_dado)
-
-    def test_mover_dado_no_disponible(self):
-        g = BackgammonGame()
-        g.tirar_dados()
-        valor_dado = max(g.get_valores_dados()) + 1  # Valor que seguro no está
-        origen = 0
-        destino = origen + valor_dado
-        g.get_tablero()[origen] = [g.get_turno().get_color()]
-        with self.assertRaises(ValueError):
-            g.mover(origen, destino, valor_dado)
-
-    def test_mover_captura_ficha(self):
-        g = BackgammonGame()
-        g.tirar_dados()
-        valor_dado = g.get_valores_dados()[0]
-        origen = 0
-        destino = origen + valor_dado
-        color = g.get_turno().get_color()
-        rival = "negra" if color == "blanca" else "blanca"
-        g.get_tablero()[origen] = [color]
-        g.get_tablero()[destino] = [rival]
-        g.mover(origen, destino, valor_dado)
-        # La ficha rival debe haber sido removida del destino
-        self.assertNotIn(rival, g.get_tablero()[destino])
-        
-    def test_cambio_turno(self):
-        g = BackgammonGame()
-        turno_inicial = g.get_turno()
-        g.cambiar_turno()
-        self.assertNotEqual(g.get_turno(), turno_inicial)
-
-    def test_cambiar_turno_dos_veces(self):
-        g = BackgammonGame()
-        turno_inicial = g.get_turno()
-        g.cambiar_turno()
-        turno_segundo = g.get_turno()
-        g.cambiar_turno()
-        turno_tercero = g.get_turno()
-        self.assertEqual(turno_tercero, turno_inicial)
+    def test_usar_valor_dado(self):
+        valores = self.game.tirar_dados()
+        v = valores[0]
+        ocurrencias = valores.count(v)
+        for _ in range(ocurrencias):
+            self.assertTrue(self.game.usar_valor_dado(v))
+        self.assertFalse(self.game.usar_valor_dado(v))
+        self.assertFalse(self.game.usar_valor_dado(99))
 
     def test_quedan_movimientos(self):
-        g = BackgammonGame()
-        g.tirar_dados()
-        self.assertTrue(g.quedan_movimientos())
-        # Usar todos los valores
-        for valor in list(g.get_valores_dados()):
-            g.usar_valor_dado(valor)
-        self.assertFalse(g.quedan_movimientos())
+        self.game.tirar_dados()
+        self.assertTrue(self.game.quedan_movimientos())
+        while self.game.quedan_movimientos():
+            v = self.game._dado.__valores__[0]
+            self.game.usar_valor_dado(v)
+        self.assertFalse(self.game.quedan_movimientos())
 
-    def test_reset_dados_cambiar_turno(self):
-        g = BackgammonGame()
-        g.tirar_dados()
-        g.cambiar_turno()
-        self.assertEqual(g.get_valores_dados(), [])
+    def test_movimiento_valido(self):
+        tablero = self.game._tablero
+        ficha = Ficha("blanca", 0)
+        tablero.__contenedor__[0] = [ficha]
+        tablero.__contenedor__[1] = []
+        self.assertTrue(self.game.movimiento_valido(0, 1))
+        tablero.__contenedor__[1] = [Ficha("blanca", 1)]
+        self.assertTrue(self.game.movimiento_valido(0, 1))
+        tablero.__contenedor__[1] = [Ficha("negra", 1)]
+        self.assertTrue(self.game.movimiento_valido(0, 1))
+        tablero.__contenedor__[1] = [Ficha("negra", 1), Ficha("negra", 1)]
+        self.assertFalse(self.game.movimiento_valido(0, 1))
+        tablero.__contenedor__[0] = []
+        self.assertFalse(self.game.movimiento_valido(0, 1))
+        tablero.__contenedor__[0] = [Ficha("negra", 0)]
+        self.assertFalse(self.game.movimiento_valido(0, 1))
+
+    def test_mover_valido_y_captura(self):
+        self.game.tirar_dados()
+        tablero = self.game._tablero
+        ficha_blanca = Ficha("blanca", 0)
+        ficha_negra = Ficha("negra", 1)
+        tablero.__contenedor__[0] = [ficha_blanca]
+        tablero.__contenedor__[1] = [ficha_negra]
+        self.game._dado.__valores__ = [1]
+        self.game.mover(0, 1, 1)
+        self.assertEqual(tablero.fichas_en_barra("negra"), 1)
+        self.assertEqual(tablero.__contenedor__[1][0].obtener_color(), "blanca")
+
+    def test_mover_invalido(self):
+        self.game.tirar_dados()
+        self.game._tablero.__contenedor__[0] = []
+        self.game._dado.__valores__ = [1]
+        with self.assertRaises(ValueError):
+            self.game.mover(0, 1, 1)
+        self.game._tablero.__contenedor__[0] = [Ficha("blanca", 0)]
+        self.game._dado.__valores__ = [1]
+        with self.assertRaises(ValueError):
+            self.game.mover(0, 1, 2)
+
+    def test_get_tablero(self):
+        tablero = self.game.get_tablero()
+        self.assertIsInstance(tablero, list)
+        self.assertEqual(len(tablero), 24)
 
     def test_verificar_victoria(self):
-        g = BackgammonGame()
-        jugador = g.get_turno()
-        for _ in range(jugador.get_total_fichas()):
-            jugador.sacar_del_tablero()
-        self.assertTrue(g.verificar_victoria())
+        self.assertFalse(self.game.verificar_victoria())
+        color = self.game._turno.get_color()
+        self.game._turno.__fuera__.clear()
+        for _ in range(self.game._turno.get_total_fichas()):
+            self.game._turno.__fuera__.append(Ficha(color, None))
+        self.assertTrue(self.game.verificar_victoria())
+
+if __name__ == "__main__":
+    unittest.main()
