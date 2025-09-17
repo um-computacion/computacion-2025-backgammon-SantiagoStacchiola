@@ -3,97 +3,76 @@ from core.dice import Dice
 from core.player import Player
 
 class BackgammonGame:
+    #Lógica principal del juego de Backgammon.
     def __init__(self):
-        # Tablero y lógica central
-        self.__tablero__ = Board()
-        self.__dado__ = Dice()
-
-        # Jugadores
-        self.__jugador_blancas__ = Player("blanca")
-        self.__jugador_negras__ = Player("negra")
-
-        # Arranca siempre el mismo o se sortea
-        self.__turno__ = self.__jugador_blancas__
+        self._tablero = Board()
+        self._dado = Dice()
+        self._jugador_blancas = Player("blanca")
+        self._jugador_negras = Player("negra")
+        self._turno = self._jugador_blancas
 
     def get_turno(self):
-        # Muestra el turno
-        return self.__turno__
-    
+        #Devuelve el jugador en turno.
+        return self._turno
+
     def cambiar_turno(self):
-        # Pasa el turno al otro jugador
-        if self.__turno__ == self.__jugador_blancas__:
-            self.__turno__ = self.__jugador_negras__
+        #Cambia el turno al otro jugador y resetea los dados.
+        if self._turno == self._jugador_blancas:
+            self._turno = self._jugador_negras
         else:
-            self.__turno__ = self.__jugador_blancas__
-        # Resetear los dados para el nuevo turno
-        self.__dado__.reset()
+            self._turno = self._jugador_blancas
+        self._dado.__init__()  # reinicia los valores de los dados
 
     def tirar_dados(self):
-        # Tira los dados para el jugador en turno
-        return self.__dado__.tirar()
-
-    def get_valores_dados(self):
-        # Muestra el dado
-        return self.__dado__.get_valores()
+        #Tira los dados para el jugador en turno.
+        return self._dado.tirar()
 
     def usar_valor_dado(self, valor):
-        # Usa el numero del dado
-        return self.__dado__.usar_valor(valor)
+        #Usa un valor de dado si está disponible.
+        # Usar el atributo real de Dice
+        if hasattr(self._dado, "__valores__") and valor in self._dado.__valores__:
+            self._dado.__valores__.remove(valor)
+            return True
+        return False
 
     def quedan_movimientos(self):
-        # Verifica si quedan movimientos 
-        return self.__dado__.quedan_valores()
+        #Devuelve True si quedan valores de dado por usar.
+        return self._dado.quedan_valores()
 
     def movimiento_valido(self, origen, destino):
-        color = self.__turno__.get_color()
-        fichas_origen = self.__tablero__.get_fichas(origen)
-        fichas_destino = self.__tablero__.get_fichas(destino)
-
-        # No hay ficha en origen
+        #Verifica si un movimiento es válido según las reglas básicas.
+        color = self._turno.get_color()
+        fichas_origen = self._tablero.get_fichas(origen)
+        fichas_destino = self._tablero.get_fichas(destino)
         if not fichas_origen:
             return False
-        # Ficha no pertenece al jugador en turno
-        if fichas_origen[0] != color:
+        if fichas_origen[0].obtener_color() != color:
             return False
-        # Destino vacío
         if not fichas_destino:
             return True
-        # Destino ocupado por fichas propias
-        if fichas_destino[0] == color:
+        if fichas_destino[0].obtener_color() == color:
             return True
-        # Destino con UNA ficha rival → captura posible
         if len(fichas_destino) == 1:
             return True
         return False
 
     def mover(self, origen, destino, valor_dado):
-        # Intenta mover una ficha según las reglas
-        color = self.__turno__.get_color()
-
-        # Verificar que el valor del dado esté disponible
+        #Mueve una ficha si el movimiento es válido y el dado corresponde.
+        color = self._turno.get_color()
         if not self.usar_valor_dado(valor_dado):
             raise ValueError(f"El valor {valor_dado} no está disponible en los dados")
-
-        # Validar movimiento
         if not self.movimiento_valido(origen, destino):
             raise ValueError("Movimiento inválido")
-
-        # Captura si hay 1 ficha enemiga
-        fichas_destino = self.__tablero__.get_fichas(destino)
-        if fichas_destino and fichas_destino[0] != color and len(fichas_destino) == 1:
-            ficha_capturada = self.__tablero__.quitar_ficha(destino)
-            self.__tablero__.enviar_a_barra(ficha_capturada)
-
-        # Ejecutar movimiento
-        self.__tablero__.mover_ficha(origen, destino)
+        fichas_destino = self._tablero.get_fichas(destino)
+        if fichas_destino and fichas_destino[0].obtener_color() != color and len(fichas_destino) == 1:
+            ficha_capturada = self._tablero.quitar_ficha(destino)
+            self._tablero.enviar_a_barra(ficha_capturada)
+        self._tablero.mover_ficha(origen, destino)
 
     def get_tablero(self):
-        # Muestra el tablero
-        return self.__tablero__.get_contenedor()
+        #Devuelve el estado del tablero (contenedor de posiciones).
+        return self._tablero.get_contenedor()
 
     def verificar_victoria(self):
-        # Verifica si el jugador gano
-        return self.__turno__.fichas_restantes() == 0
-
-
-
+        #Verifica si el jugador en turno ganó (todas sus fichas fuera)
+        return self._turno.fichas_restantes() == 0
