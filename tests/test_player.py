@@ -72,15 +72,15 @@ class TestPlayer(unittest.TestCase):
     def test_has_checker_multiple_locations(self):
         """Prueba has_checker buscando en múltiples ubicaciones."""
         p = Player("negra")
-        
+
         # Ficha en barra
         f1 = Ficha("negra", 10)
         p.enviar_a_barra(f1)  # Esto la mueve a "barra"
-        
+
         # Ficha fuera del tablero
         f2 = Ficha("negra", 15)
         p.sacar_del_tablero(f2)  # Esto la mueve a "afuera"
-        
+
         # Verificar que encuentra fichas en ambas ubicaciones
         self.assertTrue(p.has_checker("barra"))
         self.assertTrue(p.has_checker("afuera"))

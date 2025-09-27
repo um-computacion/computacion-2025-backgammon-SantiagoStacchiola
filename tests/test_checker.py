@@ -61,9 +61,8 @@ class TestChecker(unittest.TestCase):
         self.assertFalse(f.puede_mover_a(3))
 
     def test_can_move_method(self):
-        """Prueba el método can_move (aunque esté vacío)."""
+        """Prueba el método can_move."""
         f = Ficha("blanca", 1)
-        # El método está implementado con lógica básica
         result = f.can_move(1, 3)
         self.assertTrue(result)
 
@@ -108,6 +107,7 @@ class TestChecker(unittest.TestCase):
         self.assertTrue(f_negra.puede_mover_a(19))  # diferencia 1
         self.assertTrue(f_negra.puede_mover_a(14))  # diferencia 6
         self.assertFalse(f_negra.puede_mover_a(16)) # diferencia 4 (no válida)
+
 
 if __name__ == '__main__':
     unittest.main()

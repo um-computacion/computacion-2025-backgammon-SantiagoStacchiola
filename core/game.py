@@ -70,12 +70,11 @@ class Game:  # pylint: disable=R0902
         # Mueve una ficha si el movimiento es válido y el dado corresponde.
         color = self._players[self._turn].get_color()
         if not self.usar_valor_dado(valor_dado):
-            raise ValueError(f"El valor {valor_dado} no está disponible")
+            raise ValueError(f"El valor {valor_dado} no está disponible en los dados")
         if not self.movimiento_valido(origen, destino):
             raise ValueError("Movimiento inválido")
         fichas_destino = self._board.get_fichas(destino)
-        if (fichas_destino and fichas_destino[0].obtener_color() != color and
-                len(fichas_destino) == 1):
+        if fichas_destino and fichas_destino[0].obtener_color() != color and len(fichas_destino) == 1:
             ficha_capturada = self._board.quitar_ficha(destino)
             self._board.enviar_a_barra(ficha_capturada)
         self._board.mover_ficha(origen, destino)
