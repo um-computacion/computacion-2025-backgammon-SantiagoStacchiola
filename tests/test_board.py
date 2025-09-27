@@ -1,8 +1,13 @@
+"""Tests para la clase Board."""
+# pylint: disable=missing-function-docstring
+
 import unittest
 from core.board import Board
 from core.checker import Ficha
 
 class TestBoard(unittest.TestCase):
+    """Conjunto de pruebas para verificar comportamiento del tablero."""
+
     def test_estado_inicial(self):
         b = Board()
         self.assertEqual(len(b.get_contenedor()), 24)
@@ -83,5 +88,69 @@ class TestBoard(unittest.TestCase):
         # Caso posición vacía
         self.assertIsNone(b.sacar_ficha(15))
 
+    def test_reset_sets_initial_positions(self):
+        """Verifica que reset deja las posiciones iniciales correctamente."""
+        b = Board()
+        b.guardar_ficha(5, Ficha("blanca"))
+        b.guardar_ficha(10, Ficha("negra"))
+        b.reset()
+        self.assertEqual(b.contar_fichas(5), 0)
+        self.assertEqual(b.contar_fichas(10), 0)
+        self.assertEqual(b.contar_fichas(0), 2)
+        self.assertEqual(b.contar_fichas(23), 2)
+
+    def test_move_method(self):
+        """Prueba el método move del board."""
+        b = Board()
+        # Asegurar que hay fichas en posición 0
+        if b.contar_fichas(0) > 0:
+            b.move(0, 1)
+            self.assertEqual(b.contar_fichas(1), 1)
+
+    def test_point_count_method(self):
+        """Prueba el método point_count del board."""
+        b = Board()
+        count = b.point_count(0)
+        self.assertIsInstance(count, int)
+        self.assertGreaterEqual(count, 0)
+
+    def test_reingresar_desde_barra_sin_fichas(self):
+        """Prueba reingresar cuando no hay fichas en la barra."""
+        b = Board()
+        # Asegurar que no hay fichas en barra
+        self.assertEqual(b.fichas_en_barra("blanca"), 0)
+        # Intentar reingresar sin fichas en barra
+        b.reingresar_desde_barra("blanca", 10)
+        self.assertEqual(b.contar_fichas(10), 0)
+
+    def test_reingresar_desde_barra_color_invalido(self):
+        """Prueba reingresar con color que no tiene fichas en barra."""
+        b = Board()
+        f = Ficha("blanca", 5)
+        b.enviar_a_barra(f)
+        # Intentar reingresar con color diferente
+        b.reingresar_desde_barra("negra", 10)
+        self.assertEqual(b.contar_fichas(10), 0)
+
+    def test_move_con_posicion_vacia(self):
+        """Prueba el método move cuando la posición origen está vacía."""
+        b = Board()
+        # Vaciar una posición y probar move
+        b.get_contenedor()[15] = []
+        # Esto debería causar un error o comportamiento específico
+        try:
+            b.move(15, 16)
+        except IndexError:
+            pass  # Esperado si no hay fichas
+
+    def test_point_count_todas_posiciones(self):
+        """Prueba point_count en diferentes posiciones."""
+        b = Board()
+        for i in range(24):
+            count = b.point_count(i)
+            self.assertGreaterEqual(count, 0)
+
 if __name__ == '__main__':
     unittest.main()
+
+# EOF
