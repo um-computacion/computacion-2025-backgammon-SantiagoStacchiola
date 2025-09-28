@@ -19,4 +19,14 @@ class MovimientoInvalidoError(BackgammonError):
 class DadoNoDisponibleError(BackgammonError):
     """Error cuando se intenta usar un valor de dado que no está disponible."""
     pass
+
+
+class JugadorInvalidoError(BackgammonError):
+    """Error relacionado con problemas de jugador (color inválido, etc)."""
+    pass
+
+
+class PosicionVaciaError(MovimientoInvalidoError):
+    """Error cuando se intenta mover desde una posición sin fichas."""
+    pass
 # EOF

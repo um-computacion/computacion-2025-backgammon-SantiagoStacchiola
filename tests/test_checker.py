@@ -3,6 +3,7 @@
 
 import unittest
 from core.checker import Ficha
+from core.excepcions import JugadorInvalidoError
 
 
 class TestChecker(unittest.TestCase):
@@ -16,7 +17,7 @@ class TestChecker(unittest.TestCase):
 
     def test_creacion_invalida(self):
         """Prueba la creación de una ficha con valores inválidos."""
-        with self.assertRaises(ValueError):
+        with self.assertRaises(JugadorInvalidoError):
             Ficha("roja", 5)  # color inválido
 
     def test_mover(self):

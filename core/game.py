@@ -5,7 +5,7 @@
 from core.dice import Dice
 from core.board import Board
 from core.player import Player
-from core.excepcions import MovimientoInvalidoError, DadoNoDisponibleError
+from core.excepcions import MovimientoInvalidoError, DadoNoDisponibleError, PosicionVaciaError
 
 class Game:  # pylint: disable=R0902
     """Controla el flujo de una partida entre dos jugadores."""
@@ -72,6 +72,12 @@ class Game:  # pylint: disable=R0902
         color = self._players[self._turn].get_color()
         if not self.usar_valor_dado(valor_dado):
             raise DadoNoDisponibleError(f"El valor {valor_dado} no está disponible en los dados")
+        
+        # Verificar si hay fichas en origen antes de validar el movimiento
+        fichas_origen = self._board.get_fichas(origen)
+        if not fichas_origen:
+            raise PosicionVaciaError(f"No hay fichas en la posición {origen}")
+            
         if not self.movimiento_valido(origen, destino):
             raise MovimientoInvalidoError("Movimiento inválido")
         fichas_destino = self._board.get_fichas(destino)
@@ -105,4 +111,4 @@ class Game:  # pylint: disable=R0902
 
 # alias en español para compatibilidad
 BackgammonGame = Game
-# EOF (se asegura newline final)
+# EOF
