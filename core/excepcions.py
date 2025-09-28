@@ -34,4 +34,9 @@ class PosicionVaciaError(MovimientoInvalidoError):
 class PosicionBloqueadaError(MovimientoInvalidoError):
     """Error cuando el destino está bloqueado por fichas enemigas (2 o más)."""
     pass
+
+
+class MovimientoColorError(MovimientoInvalidoError):
+    """Error cuando se intenta mover una ficha que no es del color del jugador actual."""
+    pass
 # EOF

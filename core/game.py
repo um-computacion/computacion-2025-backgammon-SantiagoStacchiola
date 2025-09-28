@@ -5,7 +5,9 @@
 from core.dice import Dice
 from core.board import Board
 from core.player import Player
-from core.excepcions import MovimientoInvalidoError, DadoNoDisponibleError, PosicionVaciaError, PosicionBloqueadaError
+from core.excepcions import (MovimientoInvalidoError, DadoNoDisponibleError,
+                            PosicionVaciaError, PosicionBloqueadaError,
+                            MovimientoColorError)
 
 class Game:  # pylint: disable=R0902
     """Controla el flujo de una partida entre dos jugadores."""
@@ -71,25 +73,30 @@ class Game:  # pylint: disable=R0902
         # Mueve una ficha si el movimiento es válido y el dado corresponde.
         color = self._players[self._turn].get_color()
         if not self.usar_valor_dado(valor_dado):
-            raise DadoNoDisponibleError(f"El valor {valor_dado} no está disponible en los dados")
-        
+            raise DadoNoDisponibleError(
+                f"El valor {valor_dado} no está disponible en los dados")
+
         # Verificar si hay fichas en origen antes de validar el movimiento
         fichas_origen = self._board.get_fichas(origen)
         if not fichas_origen:
             raise PosicionVaciaError(f"No hay fichas en la posición {origen}")
-        
+
         # Verificar si la ficha es del color correcto
         if fichas_origen[0].obtener_color() != color:
-            raise MovimientoInvalidoError(f"La ficha en {origen} no es del color {color}")
-        
+            raise MovimientoColorError(
+                f"La ficha en posición {origen} es {fichas_origen[0].obtener_color()}, "
+                f"pero el turno es de {color}")
+
         # Verificar si el destino está bloqueado
         fichas_destino = self._board.get_fichas(destino)
         if fichas_destino and fichas_destino[0].obtener_color() != color and len(fichas_destino) > 1:
-            raise PosicionBloqueadaError(f"La posición {destino} está bloqueada por {len(fichas_destino)} fichas enemigas")
-            
+            raise PosicionBloqueadaError(
+                f"La posición {destino} está bloqueada por "
+                f"{len(fichas_destino)} fichas enemigas")
+
         if not self.movimiento_valido(origen, destino):
             raise MovimientoInvalidoError("Movimiento inválido")
-        
+
         # Realizar captura si es posible
         if fichas_destino and fichas_destino[0].obtener_color() != color and len(fichas_destino) == 1:
             ficha_capturada = self._board.quitar_ficha(destino)

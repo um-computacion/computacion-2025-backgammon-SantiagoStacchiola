@@ -1,8 +1,6 @@
 """Módulo de dados usado en el juego de backgammon."""
 
-
 import random
-
 
 class Dice:
     """Representa un par de dados y sus tiradas."""

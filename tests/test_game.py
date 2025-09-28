@@ -5,9 +5,10 @@ import unittest
 from core.game import BackgammonGame
 from core.checker import Ficha
 from core.player import Player
-from core.excepcions import MovimientoInvalidoError, DadoNoDisponibleError, PosicionVaciaError, PosicionBloqueadaError
+from core.excepcions import (DadoNoDisponibleError, PosicionVaciaError,
+                            PosicionBloqueadaError, MovimientoColorError)
 
-class TestGame(unittest.TestCase):
+class TestGame(unittest.TestCase):  # pylint: disable=too-many-public-methods
     """Pruebas del flujo principal del juego."""
 
     def setUp(self):
@@ -110,7 +111,7 @@ class TestGame(unittest.TestCase):
 
     def test_tirar_dados_sin_metodo(self):
         """Prueba el error cuando el dado no tiene método de tirada."""
-        class DadoSinMetodo:
+        class DadoSinMetodo:  # pylint: disable=too-few-public-methods
             """Mock de dado sin métodos."""
 
         self.game._dado = DadoSinMetodo()
@@ -168,7 +169,7 @@ class TestGame(unittest.TestCase):
 
     def test_tirar_dados_sin_metodos(self):
         """Prueba cuando el dado no tiene ni tirar ni roll."""
-        class DadoSinNingunMetodo:
+        class DadoSinNingunMetodo:  # pylint: disable=too-few-public-methods
             """Mock de dado sin ningún método."""
 
             def __init__(self):
@@ -185,6 +186,7 @@ class TestGame(unittest.TestCase):
         ficha_blanca = Ficha("blanca", 0)
         tablero.__contenedor__[0] = [ficha_blanca]
         tablero.__contenedor__[1] = []  # Posición vacía, no hay captura
+        # pylint: disable=attribute-defined-outside-init
         self.game._dado.__valores__ = [1]
 
         # Este movimiento no debería generar captura
@@ -208,9 +210,23 @@ class TestGame(unittest.TestCase):
         ficha_negra2 = Ficha("negra", 1)
         tablero.__contenedor__[0] = [ficha_blanca]
         tablero.__contenedor__[1] = [ficha_negra1, ficha_negra2]  # Posición bloqueada
+        # pylint: disable=attribute-defined-outside-init
         self.game._dado.__valores__ = [1]
         with self.assertRaises(PosicionBloqueadaError):
             self.game.mover(0, 1, 1)
+
+    def test_mover_ficha_color_incorrecto(self):
+        """Prueba movimiento de ficha del color incorrecto."""
+        self.game.tirar_dados()
+        tablero = self.game._tablero
+        ficha_negra = Ficha("negra", 0)  # Ficha negra en turno de blancas
+        tablero.__contenedor__[0] = [ficha_negra]
+        tablero.__contenedor__[1] = []
+        # pylint: disable=attribute-defined-outside-init
+        self.game._dado.__valores__ = [1]
+        with self.assertRaises(MovimientoColorError):
+            self.game.mover(0, 1, 1)
+
 
 if __name__ == "__main__":
     unittest.main()

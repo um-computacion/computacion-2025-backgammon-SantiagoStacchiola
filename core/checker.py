@@ -45,7 +45,7 @@ class Checker:
         """Devuelve una representación en cadena de la ficha."""
         return f"Ficha({self.__color__}, pos={self.__posicion__})"
 
-    # wrappers / alias en español para compatibilidad con tests existentes
+    # wrappers / alias en español para compatibilidad
     def get_posicion(self):
         """Devuelve la posición de la ficha (método directo)."""
         return self.__posicion__
