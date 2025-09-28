@@ -112,8 +112,7 @@ class Board:
         self.__contenedor__[23] = [Ficha("negra", 23) for _ in range(2)]
         self.__contenedor__[12] = [Ficha("negra", 12) for _ in range(5)]
         self.__contenedor__[7] = [Ficha("negra", 7) for _ in range(3)]
-        # NO colocar fichas en posición 5 después del reset según el test
-        # La posición 5 debe quedar vacía después del reset
+        # La posición 5 debe quedar vacía después del reset según el test
     
     def move(self, from_point, to_point):
         """Mueve una ficha validando reglas básicas."""

@@ -1,11 +1,13 @@
 """Módulo que define la ficha (checker) usada en el tablero."""
 
+from core.excepcions import JugadorInvalidoError
+
 class Checker:
     """Representa una ficha individual en el tablero."""
 
     def __init__(self, color: str, posicion=None):
         if color not in ["blanca", "negra"]:
-            raise ValueError("Color inválido: debe ser 'blanca' o 'negra'")
+            raise JugadorInvalidoError("Color inválido: debe ser 'blanca' o 'negra'")
         self.__color__ = color
         self.__posicion__ = posicion
 

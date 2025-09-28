@@ -5,7 +5,7 @@ import unittest
 from core.game import BackgammonGame
 from core.checker import Ficha
 from core.player import Player
-from core.excepcions import MovimientoInvalidoError, DadoNoDisponibleError
+from core.excepcions import MovimientoInvalidoError, DadoNoDisponibleError, PosicionVaciaError
 
 class TestGame(unittest.TestCase):
     """Pruebas del flujo principal del juego."""
@@ -86,7 +86,7 @@ class TestGame(unittest.TestCase):
         self.game.tirar_dados()
         self.game._tablero.__contenedor__[0] = []
         self.game._dado.__valores__ = [1]
-        with self.assertRaises(MovimientoInvalidoError):
+        with self.assertRaises(PosicionVaciaError):
             self.game.mover(0, 1, 1)
         self.game._tablero.__contenedor__[0] = [Ficha("blanca", 0)]
         self.game._dado.__valores__ = [1]

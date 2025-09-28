@@ -4,6 +4,7 @@
 import unittest
 from core.player import Player
 from core.checker import Ficha
+from core.excepcions import JugadorInvalidoError
 
 
 class TestPlayer(unittest.TestCase):
@@ -19,7 +20,7 @@ class TestPlayer(unittest.TestCase):
 
     def test_creacion_color_invalido(self):
         """Prueba que se lanza una excepción al crear un jugador con un color inválido."""
-        with self.assertRaises(ValueError):
+        with self.assertRaises(JugadorInvalidoError):
             Player("rojo")
 
     def test_enviar_y_sacar_de_barra(self):
