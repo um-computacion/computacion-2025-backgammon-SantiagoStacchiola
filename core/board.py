@@ -6,7 +6,7 @@ class Board:
     """Modelo del tablero de backgammon con sus puntos y fichas."""
 
     def __init__(self):
-         # 24 posiciones del tablero, cada una lista de fichas
+        # 24 posiciones del tablero, cada una lista de fichas
         self.__contenedor__ = [[] for _ in range(24)]
 
         # Barras (fichas capturadas)
@@ -114,14 +114,23 @@ class Board:
         self.__contenedor__[7] = [Ficha("negra", 7) for _ in range(3)]
         # La posición 5 debe quedar vacía después del reset según el test
     
-    def move(self, from_point, to_point):
+    def mover(self, desde_punto, hasta_punto):
         """Mueve una ficha validando reglas básicas."""
-        # Lógica para mover una ficha de from_point a to_point
-        ficha = self.__contenedor__[from_point].pop()
-        ficha.mover(to_point)
-        self.__contenedor__[to_point].append(ficha)
+        if self.__contenedor__[desde_punto]:
+            ficha = self.__contenedor__[desde_punto].pop()
+            ficha.mover(hasta_punto)
+            self.__contenedor__[hasta_punto].append(ficha)
+
+    def contar_punto(self, punto):
+        """Devuelve la cantidad de fichas en un punto dado."""
+        return len(self.__contenedor__[punto])
+
+    # Alias en inglés para compatibilidad con tests existentes
+    def move(self, from_point, to_point):
+        """Alias en inglés para mover()."""
+        return self.mover(from_point, to_point)
 
     def point_count(self, point):
-        """Devuelve la cantidad de fichas en un punto dado."""
-        return len(self.__contenedor__[point])
+        """Alias en inglés para contar_punto()."""
+        return self.contar_punto(point)
 # EOF

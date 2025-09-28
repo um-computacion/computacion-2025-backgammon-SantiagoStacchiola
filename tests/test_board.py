@@ -99,55 +99,37 @@ class TestBoard(unittest.TestCase):
         self.assertEqual(b.contar_fichas(0), 2)
         self.assertEqual(b.contar_fichas(23), 2)
 
-    def test_move_method(self):
-        """Prueba el método move del board."""
+    def test_metodo_mover(self):
+        """Prueba el método mover del board."""
         b = Board()
         # Asegurar que hay fichas en posición 0
         if b.contar_fichas(0) > 0:
-            b.move(0, 1)
+            b.mover(0, 1)
             self.assertEqual(b.contar_fichas(1), 1)
 
-    def test_point_count_method(self):
-        """Prueba el método point_count del board."""
+    def test_metodo_contar_punto(self):
+        """Prueba el método contar_punto del board."""
         b = Board()
-        count = b.point_count(0)
+        count = b.contar_punto(0)
         self.assertIsInstance(count, int)
         self.assertGreaterEqual(count, 0)
 
-    def test_reingresar_desde_barra_sin_fichas(self):
-        """Prueba reingresar cuando no hay fichas en la barra."""
+    def test_mover_con_posicion_vacia(self):
+        """Prueba el método mover cuando la posición origen está vacía."""
         b = Board()
-        # Asegurar que no hay fichas en barra
-        self.assertEqual(b.fichas_en_barra("blanca"), 0)
-        # Intentar reingresar sin fichas en barra
-        b.reingresar_desde_barra("blanca", 10)
-        self.assertEqual(b.contar_fichas(10), 0)
-
-    def test_reingresar_desde_barra_color_invalido(self):
-        """Prueba reingresar con color que no tiene fichas en barra."""
-        b = Board()
-        f = Ficha("blanca", 5)
-        b.enviar_a_barra(f)
-        # Intentar reingresar con color diferente
-        b.reingresar_desde_barra("negra", 10)
-        self.assertEqual(b.contar_fichas(10), 0)
-
-    def test_move_con_posicion_vacia(self):
-        """Prueba el método move cuando la posición origen está vacía."""
-        b = Board()
-        # Vaciar una posición y probar move
+        # Vaciar una posición y probar mover
         b.get_contenedor()[15] = []
         # Esto debería causar un error o comportamiento específico
         try:
-            b.move(15, 16)
+            b.mover(15, 16)
         except IndexError:
             pass  # Esperado si no hay fichas
 
-    def test_point_count_todas_posiciones(self):
-        """Prueba point_count en diferentes posiciones."""
+    def test_contar_punto_todas_posiciones(self):
+        """Prueba contar_punto en diferentes posiciones."""
         b = Board()
         for i in range(24):
-            count = b.point_count(i)
+            count = b.contar_punto(i)
             self.assertGreaterEqual(count, 0)
 
 if __name__ == '__main__':

@@ -41,7 +41,7 @@ class TestDice(unittest.TestCase):
         self.assertFalse(d.quedan_valores())
 
     @patch("random.randint", side_effect=[1, 2])
-    def test_values_no_doble(self, _mock_randint):
+    def test_metodo_valores_no_doble(self, _mock_randint):
         """Prueba el método values con tirada no doble."""
         d = Dice()
         d.tirar()
@@ -50,7 +50,7 @@ class TestDice(unittest.TestCase):
         self.assertIn(1, valores)
         self.assertIn(2, valores)
 
-    def test_roll_method_direct(self):
+    def test_metodo_roll_directo(self):
         """Prueba directa del método roll."""
         d = Dice()
         resultado = d.roll()

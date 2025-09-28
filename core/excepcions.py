@@ -29,4 +29,9 @@ class JugadorInvalidoError(BackgammonError):
 class PosicionVaciaError(MovimientoInvalidoError):
     """Error cuando se intenta mover desde una posición sin fichas."""
     pass
+
+
+class PosicionBloqueadaError(MovimientoInvalidoError):
+    """Error cuando el destino está bloqueado por fichas enemigas (2 o más)."""
+    pass
 # EOF
