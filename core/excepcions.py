@@ -9,3 +9,14 @@ class BackgammonError(Exception):
 class EntradaInvalidaError(BackgammonError):
     """Error cuando el input del usuario no es válido."""
     pass
+
+
+class MovimientoInvalidoError(BackgammonError):
+    """Error para un movimiento no permitido por las reglas del Backgammon."""
+    pass
+
+
+class DadoNoDisponibleError(BackgammonError):
+    """Error cuando se intenta usar un valor de dado que no está disponible."""
+    pass
+# EOF

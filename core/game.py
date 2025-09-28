@@ -5,6 +5,7 @@
 from core.dice import Dice
 from core.board import Board
 from core.player import Player
+from core.excepcions import MovimientoInvalidoError, DadoNoDisponibleError
 
 class Game:  # pylint: disable=R0902
     """Controla el flujo de una partida entre dos jugadores."""
@@ -70,9 +71,9 @@ class Game:  # pylint: disable=R0902
         # Mueve una ficha si el movimiento es válido y el dado corresponde.
         color = self._players[self._turn].get_color()
         if not self.usar_valor_dado(valor_dado):
-            raise ValueError(f"El valor {valor_dado} no está disponible en los dados")
+            raise DadoNoDisponibleError(f"El valor {valor_dado} no está disponible en los dados")
         if not self.movimiento_valido(origen, destino):
-            raise ValueError("Movimiento inválido")
+            raise MovimientoInvalidoError("Movimiento inválido")
         fichas_destino = self._board.get_fichas(destino)
         if fichas_destino and fichas_destino[0].obtener_color() != color and len(fichas_destino) == 1:
             ficha_capturada = self._board.quitar_ficha(destino)
