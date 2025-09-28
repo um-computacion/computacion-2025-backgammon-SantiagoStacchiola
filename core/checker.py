@@ -31,10 +31,15 @@ class Checker:
         """Devuelve True si la ficha está afuera del tablero, False en caso contrario."""
         return self.__posicion__ == "afuera"
 
-    def can_move(self, from_point, to_point):
-        """Determina si la ficha puede moverse de from_point a to_point según reglas básicas."""
+    def puede_mover(self, desde_punto, hasta_punto):
+        """Determina si la ficha puede moverse de desde_punto a hasta_punto según reglas básicas."""
         # Lógica básica de validación de movimiento
-        return abs(to_point - from_point) <= 6
+        return abs(hasta_punto - desde_punto) <= 6
+
+    # Alias en inglés para compatibilidad
+    def can_move(self, from_point, to_point):
+        """Alias en inglés para puede_mover()."""
+        return self.puede_mover(from_point, to_point)
 
     def __repr__(self):
         """Devuelve una representación en cadena de la ficha."""

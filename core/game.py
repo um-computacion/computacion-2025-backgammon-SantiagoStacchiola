@@ -5,7 +5,7 @@
 from core.dice import Dice
 from core.board import Board
 from core.player import Player
-from core.excepcions import MovimientoInvalidoError, DadoNoDisponibleError, PosicionVaciaError
+from core.excepcions import MovimientoInvalidoError, DadoNoDisponibleError, PosicionVaciaError, PosicionBloqueadaError
 
 class Game:  # pylint: disable=R0902
     """Controla el flujo de una partida entre dos jugadores."""
@@ -77,10 +77,20 @@ class Game:  # pylint: disable=R0902
         fichas_origen = self._board.get_fichas(origen)
         if not fichas_origen:
             raise PosicionVaciaError(f"No hay fichas en la posición {origen}")
+        
+        # Verificar si la ficha es del color correcto
+        if fichas_origen[0].obtener_color() != color:
+            raise MovimientoInvalidoError(f"La ficha en {origen} no es del color {color}")
+        
+        # Verificar si el destino está bloqueado
+        fichas_destino = self._board.get_fichas(destino)
+        if fichas_destino and fichas_destino[0].obtener_color() != color and len(fichas_destino) > 1:
+            raise PosicionBloqueadaError(f"La posición {destino} está bloqueada por {len(fichas_destino)} fichas enemigas")
             
         if not self.movimiento_valido(origen, destino):
             raise MovimientoInvalidoError("Movimiento inválido")
-        fichas_destino = self._board.get_fichas(destino)
+        
+        # Realizar captura si es posible
         if fichas_destino and fichas_destino[0].obtener_color() != color and len(fichas_destino) == 1:
             ficha_capturada = self._board.quitar_ficha(destino)
             self._board.enviar_a_barra(ficha_capturada)
@@ -94,12 +104,17 @@ class Game:  # pylint: disable=R0902
         # Verifica si el jugador en turno ganó (todas sus fichas fuera)
         return self._players[self._turn].fichas_restantes() == 0
 
-    def next_turn(self):
+    def siguiente_turno(self):
         """Avanza el turno al siguiente jugador y prepara la tirada."""
         self._turn = (self._turn + 1) % 2
         self._turno = self._players[self._turn]  # Actualizar para que sea el objeto jugador
         # línea corta para evitar C0301
         self._state = "waiting"
+
+    # Alias en inglés para compatibilidad con tests existentes
+    def next_turn(self):
+        """Alias en inglés para siguiente_turno()."""
+        return self.siguiente_turno()
 
     def tirar_dados(self):
         """Realiza la tirada de dados usando la API disponible en Dice."""

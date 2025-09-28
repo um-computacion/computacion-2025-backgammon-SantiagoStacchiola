@@ -5,7 +5,7 @@ import unittest
 from core.game import BackgammonGame
 from core.checker import Ficha
 from core.player import Player
-from core.excepcions import MovimientoInvalidoError, DadoNoDisponibleError, PosicionVaciaError
+from core.excepcions import MovimientoInvalidoError, DadoNoDisponibleError, PosicionVaciaError, PosicionBloqueadaError
 
 class TestGame(unittest.TestCase):
     """Pruebas del flujo principal del juego."""
@@ -133,20 +133,20 @@ class TestGame(unittest.TestCase):
         game = BackgammonGame(p1, p2)
         self.assertEqual(game.get_turno().get_color(), "blanca")
 
-    def test_next_turn_method(self):
-        """Prueba el método next_turn."""
+    def test_siguiente_turno(self):
+        """Prueba el método siguiente_turno."""
         color_inicial = self.game.get_turno().get_color()
-        self.game.next_turn()
+        self.game.siguiente_turno()
         color_despues = self.game.get_turno().get_color()
         self.assertNotEqual(color_inicial, color_despues)
 
-    def test_state_attribute(self):
+    def test_atributo_estado(self):
         """Prueba que el atributo _state se actualiza correctamente."""
         self.assertEqual(self.game._state, "initialized")
-        self.game.next_turn()
+        self.game.siguiente_turno()
         self.assertEqual(self.game._state, "waiting")
 
-    def test_tirar_dados_con_roll(self):
+    def test_tirar_dados_con_metodo_roll(self):
         """Prueba tirar dados usando el método roll."""
         # Eliminar el método tirar para forzar uso de roll
         if hasattr(self.game._dado, 'tirar'):
@@ -154,7 +154,7 @@ class TestGame(unittest.TestCase):
         valores = self.game.tirar_dados()
         self.assertIsInstance(valores, list)
 
-    def test_constructor_con_un_solo_jugador(self):
+    def test_constructor_con_un_jugador(self):
         """Prueba constructor con solo un jugador."""
         p1 = Player("blanca")
         # Solo pasamos player1, player2 debería ser None y luego creado automáticamente
@@ -166,7 +166,7 @@ class TestGame(unittest.TestCase):
         game = BackgammonGame(None, None)
         self.assertEqual(game.get_turno().get_color(), "blanca")
 
-    def test_tirar_dados_metodo_inexistente(self):
+    def test_tirar_dados_sin_metodos(self):
         """Prueba cuando el dado no tiene ni tirar ni roll."""
         class DadoSinNingunMetodo:
             """Mock de dado sin ningún método."""
@@ -198,6 +198,19 @@ class TestGame(unittest.TestCase):
         jugador_actual = self.game.get_turno()
         self.assertGreater(jugador_actual.fichas_restantes(), 0)
         self.assertFalse(self.game.verificar_victoria())
+
+    def test_mover_posicion_bloqueada(self):
+        """Prueba movimiento a posición bloqueada por fichas enemigas."""
+        self.game.tirar_dados()
+        tablero = self.game._tablero
+        ficha_blanca = Ficha("blanca", 0)
+        ficha_negra1 = Ficha("negra", 1)
+        ficha_negra2 = Ficha("negra", 1)
+        tablero.__contenedor__[0] = [ficha_blanca]
+        tablero.__contenedor__[1] = [ficha_negra1, ficha_negra2]  # Posición bloqueada
+        self.game._dado.__valores__ = [1]
+        with self.assertRaises(PosicionBloqueadaError):
+            self.game.mover(0, 1, 1)
 
 if __name__ == "__main__":
     unittest.main()

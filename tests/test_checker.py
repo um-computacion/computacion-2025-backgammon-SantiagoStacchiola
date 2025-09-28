@@ -44,7 +44,7 @@ class TestChecker(unittest.TestCase):
         self.assertIn("blanca", repr(f))
         self.assertIn("3", repr(f))
 
-    def test_can_move_basic(self):
+    def test_puede_mover_basico(self):
         """Comprueba movimientos legales básicos de una ficha."""
         f = Ficha("blanca", 1)
         self.assertTrue(f.puede_mover_a(3))
@@ -61,10 +61,10 @@ class TestChecker(unittest.TestCase):
         f = Ficha("blanca", None)
         self.assertFalse(f.puede_mover_a(3))
 
-    def test_can_move_method(self):
-        """Prueba el método can_move."""
+    def test_metodo_puede_mover(self):
+        """Prueba el método puede_mover."""
         f = Ficha("blanca", 1)
-        result = f.can_move(1, 3)
+        result = f.puede_mover(1, 3)
         self.assertTrue(result)
 
     def test_puede_mover_diferentes_distancias(self):
