@@ -125,7 +125,7 @@ class Board:
         """Devuelve la cantidad de fichas en un punto dado."""
         return len(self.__contenedor__[punto])
 
-    # Alias en inglés para compatibilidad con tests existentes
+    # Alias en inglés para compatibilidad
     def move(self, from_point, to_point):
         """Alias en inglés para mover()."""
         return self.mover(from_point, to_point)
