@@ -20,43 +20,44 @@ class Game:  # pylint: disable=R0902
         if player2 is None:
             player2 = Player("negra")
 
-        self._players = (player1, player2)
-        self._turn = 0
-        self._turno = self._players[0]  # Cambiar para que sea el objeto jugador
+        self.__players__ = (player1, player2)
+        self.__turn__ = 0
+        self.__turno__ = self.__players__[0]  # Cambiar para que sea el objeto jugador
         # Instanciar en lugar de llamar a dunder __init__
-        self._dice = Dice()
-        self._dado = self._dice
-        self._board = Board()
-        self._tablero = self._board
-        self._state = "initialized"
+        self.__dice__ = Dice()
+        self.__dado__ = self.__dice__
+        self.__board__ = Board()
+        self.__tablero__ = self.__board__
+        self.__state__ = "initialized"
 
     def get_turno(self):
         # Devuelve el jugador en turno (objeto jugador, no índice)
-        return self._players[self._turn]
+        return self.__players__[self.__turn__]
 
     def cambiar_turno(self):
         # Cambia el turno al otro jugador y resetea los dados.
-        self._turn = (self._turn + 1) % 2
-        self._turno = self._players[self._turn]  # Actualizar para que sea el objeto jugador
-        self._dice = Dice()  # Crear nueva instancia en lugar de __init__
+        self.__turn__ = (self.__turn__ + 1) % 2
+        # Actualizar para que sea el objeto jugador
+        self.__turno__ = self.__players__[self.__turn__]
+        self.__dice__ = Dice()  # Crear nueva instancia en lugar de __init__
 
     def usar_valor_dado(self, valor):
         # Usa un valor de dado si está disponible.
         # Usar el atributo real de Dice
-        if hasattr(self._dice, "__valores__") and valor in self._dice.__valores__:
-            self._dice.__valores__.remove(valor)
+        if hasattr(self.__dice__, "__valores__") and valor in self.__dice__.__valores__:
+            self.__dice__.__valores__.remove(valor)
             return True
         return False
 
     def quedan_movimientos(self):
         # Devuelve True si quedan valores de dado por usar.
-        return self._dice.quedan_valores()
+        return self.__dice__.quedan_valores()
 
     def movimiento_valido(self, origen, destino):
         # Verifica si un movimiento es válido según las reglas básicas.
-        color = self._players[self._turn].get_color()
-        fichas_origen = self._board.get_fichas(origen)
-        fichas_destino = self._board.get_fichas(destino)
+        color = self.__players__[self.__turn__].get_color()
+        fichas_origen = self.__board__.get_fichas(origen)
+        fichas_destino = self.__board__.get_fichas(destino)
         if not fichas_origen:
             return False
         if fichas_origen[0].obtener_color() != color:
@@ -71,13 +72,13 @@ class Game:  # pylint: disable=R0902
 
     def mover(self, origen, destino, valor_dado):
         # Mueve una ficha si el movimiento es válido y el dado corresponde.
-        color = self._players[self._turn].get_color()
+        color = self.__players__[self.__turn__].get_color()
         if not self.usar_valor_dado(valor_dado):
             raise DadoNoDisponibleError(
                 f"El valor {valor_dado} no está disponible en los dados")
 
         # Verificar si hay fichas en origen antes de validar el movimiento
-        fichas_origen = self._board.get_fichas(origen)
+        fichas_origen = self.__board__.get_fichas(origen)
         if not fichas_origen:
             raise PosicionVaciaError(f"No hay fichas en la posición {origen}")
 
@@ -88,8 +89,9 @@ class Game:  # pylint: disable=R0902
                 f"pero el turno es de {color}")
 
         # Verificar si el destino está bloqueado
-        fichas_destino = self._board.get_fichas(destino)
-        if fichas_destino and fichas_destino[0].obtener_color() != color and len(fichas_destino) > 1:
+        fichas_destino = self.__board__.get_fichas(destino)
+        if (fichas_destino and fichas_destino[0].obtener_color() != color
+                and len(fichas_destino) > 1):
             raise PosicionBloqueadaError(
                 f"La posición {destino} está bloqueada por "
                 f"{len(fichas_destino)} fichas enemigas")
@@ -98,25 +100,27 @@ class Game:  # pylint: disable=R0902
             raise MovimientoInvalidoError("Movimiento inválido")
 
         # Realizar captura si es posible
-        if fichas_destino and fichas_destino[0].obtener_color() != color and len(fichas_destino) == 1:
-            ficha_capturada = self._board.quitar_ficha(destino)
-            self._board.enviar_a_barra(ficha_capturada)
-        self._board.mover_ficha(origen, destino)
+        if (fichas_destino and fichas_destino[0].obtener_color() != color
+                and len(fichas_destino) == 1):
+            ficha_capturada = self.__board__.quitar_ficha(destino)
+            self.__board__.enviar_a_barra(ficha_capturada)
+        self.__board__.mover_ficha(origen, destino)
 
     def get_tablero(self):
         # Devuelve el estado del tablero (contenedor de posiciones).
-        return self._board.get_contenedor()
+        return self.__board__.get_contenedor()
 
     def verificar_victoria(self):
         # Verifica si el jugador en turno ganó (todas sus fichas fuera)
-        return self._players[self._turn].fichas_restantes() == 0
+        return self.__players__[self.__turn__].fichas_restantes() == 0
 
     def siguiente_turno(self):
         """Avanza el turno al siguiente jugador y prepara la tirada."""
-        self._turn = (self._turn + 1) % 2
-        self._turno = self._players[self._turn]  # Actualizar para que sea el objeto jugador
+        self.__turn__ = (self.__turn__ + 1) % 2
+        # Actualizar para que sea el objeto jugador
+        self.__turno__ = self.__players__[self.__turn__]
         # línea corta para evitar C0301
-        self._state = "waiting"
+        self.__state__ = "waiting"
 
     # Alias en inglés para compatibilidad con tests existentes
     def next_turn(self):
@@ -125,10 +129,10 @@ class Game:  # pylint: disable=R0902
 
     def tirar_dados(self):
         """Realiza la tirada de dados usando la API disponible en Dice."""
-        if hasattr(self._dado, "tirar"):
-            return self._dado.tirar()
-        if hasattr(self._dado, "roll"):
-            return self._dado.roll()
+        if hasattr(self.__dado__, "tirar"):
+            return self.__dado__.tirar()
+        if hasattr(self.__dado__, "roll"):
+            return self.__dado__.roll()
         raise AttributeError("El objeto dado no expone método de tirada conocido")
 
 # alias en español para compatibilidad

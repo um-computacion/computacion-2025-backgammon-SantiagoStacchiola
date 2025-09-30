@@ -24,7 +24,7 @@ class Board:
         self.__contenedor__[12] = [Ficha("negra", 12) for _ in range(5)]
         self.__contenedor__[7] = [Ficha("negra", 7) for _ in range(3)]
         self.__contenedor__[5] = [Ficha("negra", 5) for _ in range(5)]
-    
+
     def get_contenedor(self):
         """Muestra el contenedor."""
         return self.__contenedor__
@@ -55,13 +55,13 @@ class Board:
             ficha.mover(None)
             return ficha
         return None
-    
+
     def mover_ficha(self, origen, destino):
         """Mueve una ficha de una posición de origen a una de destino."""
         ficha = self.__contenedor__[origen].pop()
         ficha.mover(destino)
         self.__contenedor__[destino].append(ficha)
-    
+
     def enviar_a_barra(self, ficha: Ficha):
         """Envía una ficha a la barra (fichas capturadas)."""
         ficha.mover("barra")
@@ -69,7 +69,7 @@ class Board:
             self.__barra_blancas__.append(ficha)
         else:
             self.__barra_negras__.append(ficha)
-    
+
     def reingresar_desde_barra(self, color, destino):
         """Reingresa una ficha desde la barra a una posición del tablero."""
         if color == "blanca" and self.__barra_blancas__:
@@ -80,11 +80,11 @@ class Board:
             ficha = self.__barra_negras__.pop()
             ficha.mover(destino)
             self.__contenedor__[destino].append(ficha)
-    
+
     def fichas_en_barra(self, color):
         """Devuelve la cantidad de fichas de un color en la barra."""
         return len(self.__barra_blancas__ if color == "blanca" else self.__barra_negras__)
-        
+
     def sacar_ficha(self, posicion):
         """Saca una ficha de una posición y la envía 'afuera'."""
         if self.__contenedor__[posicion]:
@@ -113,7 +113,7 @@ class Board:
         self.__contenedor__[12] = [Ficha("negra", 12) for _ in range(5)]
         self.__contenedor__[7] = [Ficha("negra", 7) for _ in range(3)]
         # La posición 5 debe quedar vacía después del reset según el test
-    
+
     def mover(self, desde_punto, hasta_punto):
         """Mueve una ficha validando reglas básicas."""
         if self.__contenedor__[desde_punto]:
