@@ -49,3 +49,153 @@ class BackgammonCLI:
                 print(f"  {i+1:2d}: {count} fichas {color}")
         
         print("="*60)
+
+    def mostrar_dados(self):
+        """Muestra los dados disponibles."""
+        dice = self.game.__dice__
+        if hasattr(dice, '__valores__') and dice.__valores__:
+            valores = dice.__valores__
+            print(f"Dados disponibles: {valores}")
+        else:
+            print("No hay dados disponibles")
+    
+    def mostrar_turno(self):
+        """Muestra de quién es el turno."""
+        jugador = self.game.get_turno()
+        print(f"\n>>> Turno del jugador: {jugador.get_color().upper()} <<<")
+    
+    def pedir_movimiento(self):
+        """Pide al usuario que ingrese un movimiento."""
+        jugador = self.game.get_turno()
+        fichas_en_barra = self.game.__board__.fichas_en_barra(jugador.get_color())
+        
+        print("\nOpciones:")
+        if fichas_en_barra > 0:
+            print("  ⚠️  Tienes fichas en la barra. Debes reingresarlas primero.")
+            print("  - Reingresar desde barra: barra,destino,dado (ej: barra,3,3)")
+        else:
+            print("  - Movimiento normal: origen,destino,dado (ej: 1,7,6)")
+            print("  - Bearing off: origen,off,dado (ej: 19,off,3)")
+        print("  - Pasar turno: 'pass'")
+        print("  - Salir: 'quit'")
+        
+        entrada = input("\n> ").strip().lower()
+        
+        if entrada == 'quit':
+            return 'quit'
+        elif entrada == 'pass':
+            return 'pass'
+        
+        try:
+            partes = entrada.split(',')
+            if len(partes) != 3:
+                print("Error: Use formato origen,destino,dado")
+                return None
+            
+            origen_str = partes[0].strip()
+            destino_str = partes[1].strip()
+            dado = int(partes[2].strip())
+            
+            # Manejo especial para barra y bearing off
+            if origen_str == 'barra':
+                return ('barra', int(destino_str) - 1, dado)
+            elif destino_str == 'off':
+                return (int(origen_str) - 1, 'off', dado)
+            else:
+                origen = int(origen_str)
+                destino = int(destino_str)
+                # Convertir a índices (el usuario usa 1-24, el sistema 0-23)
+                return (origen - 1, destino - 1, dado)
+            
+        except ValueError:
+            print("Error: Ingrese números válidos")
+            return None
+    
+    def ejecutar_movimiento(self, origen, destino, dado):
+        """Ejecuta un movimiento en el juego."""
+        try:
+            jugador = self.game.get_turno()
+            
+            # Manejo de reingresar desde barra
+            if origen == 'barra':
+                if self.game.__board__.fichas_en_barra(jugador.get_color()) == 0:
+                    print("✗ Error: No tienes fichas en la barra")
+                    return False
+                
+                # Verificar que el destino no esté bloqueado
+                tablero = self.game.get_tablero()
+                fichas_destino = tablero[destino]
+                if (fichas_destino and 
+                    fichas_destino[0].obtener_color() != jugador.get_color() and 
+                    len(fichas_destino) > 1):
+                    print(f"✗ Error: Posición {destino + 1} está bloqueada")
+                    return False
+                
+                # Usar dado y reingresar
+                if not self.game.usar_valor_dado(dado):
+                    print(f"✗ Error: El dado {dado} no está disponible")
+                    return False
+                
+                self.game.__board__.reingresar_desde_barra(jugador.get_color(), destino)
+                print("✓ Ficha reingresada desde la barra")
+                return True
+            
+            # Manejo de bearing off
+            elif destino == 'off':
+                # Verificar que todas las fichas estén en home board
+                if not self._todas_fichas_en_home(jugador):
+                    print("✗ Error: Todas las fichas deben estar en el home board para bearing off")
+                    return False
+                
+                # Usar dado y sacar ficha
+                if not self.game.usar_valor_dado(dado):
+                    print(f"✗ Error: El dado {dado} no está disponible")
+                    return False
+                
+                ficha_sacada = self.game.__board__.sacar_ficha(origen)
+                if ficha_sacada:
+                    jugador.sacar_del_tablero(ficha_sacada)
+                    print("✓ Ficha sacada del tablero (bearing off)")
+                    return True
+                else:
+                    print(f"✗ Error: No hay fichas en posición {origen + 1}")
+                    return False
+            
+            # Movimiento normal
+            else:
+                self.game.mover(origen, destino, dado)
+                print("✓ Movimiento realizado exitosamente")
+                return True
+                
+        except (MovimientoInvalidoError, DadoNoDisponibleError, 
+                PosicionVaciaError, PosicionBloqueadaError, 
+                MovimientoColorError) as e:
+            print(f"✗ Error: {e}")
+            return False
+    
+    def _todas_fichas_en_home(self, jugador):
+        """Verifica si todas las fichas del jugador están en su home board."""
+        tablero = self.game.get_tablero()
+        color = jugador.get_color()
+        
+        # Home board para blancas: posiciones 19-24 (índices 18-23)
+        # Home board para negras: posiciones 1-6 (índices 0-5)
+        if color == "blanca":
+            home_range = range(18, 24)
+            fuera_home_range = range(0, 18)
+        else:
+            home_range = range(0, 6)
+            fuera_home_range = range(6, 24)
+        
+        # Verificar que no haya fichas fuera del home board
+        for i in fuera_home_range:
+            if tablero[i]:
+                for ficha in tablero[i]:
+                    if ficha.obtener_color() == color:
+                        return False
+        
+        # Verificar que no haya fichas en la barra
+        if self.game.__board__.fichas_en_barra(color) > 0:
+            return False
+            
+        return True
