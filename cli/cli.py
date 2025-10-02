@@ -199,3 +199,90 @@ class BackgammonCLI:
             return False
             
         return True
+    
+    def verificar_fin_juego(self):
+        """Verifica si el juego ha terminado."""
+        if self.game.verificar_victoria():
+            ganador = self.game.get_turno()
+            print(f"\n🎉 ¡JUEGO TERMINADO! 🎉")
+            print(f"¡Ganó el jugador {ganador.get_color().upper()}!")
+            return True
+        return False
+    
+    def jugar(self):
+        """Bucle principal del juego."""
+        print("🎲 ¡Bienvenido al Backgammon! 🎲")
+        print("Jugador 1: fichas BLANCAS")
+        print("Jugador 2: fichas NEGRAS")
+        print("\nPresiona Enter para comenzar...")
+        input()
+        
+        # Crear jugadores
+        player1 = Player("blanca")
+        player2 = Player("negra") 
+        
+        # Inicializar juego
+        self.game = Game(player1, player2)
+        
+        while True:
+            # Mostrar estado del juego
+            self.mostrar_tablero()
+            self.mostrar_turno()
+            
+            # Lanzar dados
+            self.game.tirar_dados()
+            self.mostrar_dados()
+            
+            # Verificar si hay movimientos disponibles
+            if not self.game.quedan_movimientos():
+                print("No hay movimientos disponibles. Pasando turno...")
+                self.game.cambiar_turno()
+                continue
+            
+            # Jugador hace movimientos
+            movimientos_realizados = False
+            while self.game.quedan_movimientos():
+                movimiento = self.pedir_movimiento()
+                
+                if movimiento == 'quit':
+                    print("¡Gracias por jugar!")
+                    return
+                elif movimiento == 'pass':
+                    print("Pasando turno...")
+                    break
+                elif movimiento is None:
+                    continue
+                
+                origen, destino, dado = movimiento
+                
+                if self.ejecutar_movimiento(origen, destino, dado):
+                    movimientos_realizados = True
+                    
+                    # Verificar si el juego terminó
+                    if self.verificar_fin_juego():
+                        return
+                
+                # Mostrar tablero actualizado después de un movimiento exitoso
+                if movimientos_realizados:
+                    self.mostrar_dados()  # Mostrar dados restantes
+            
+            # Cambiar turno
+            self.game.cambiar_turno()
+            print("\n" + "~"*60)
+            print("Cambiando turno...")
+            print("~"*60)
+
+
+def main():
+    """Función principal para ejecutar el CLI."""
+    try:
+        cli = BackgammonCLI()
+        cli.jugar()
+    except KeyboardInterrupt:
+        print("\n\n¡Gracias por jugar!")
+    except Exception as e:
+        print(f"\n¡Ups! Ocurrió un error: {e}")
+
+
+if __name__ == "__main__":
+    main()
