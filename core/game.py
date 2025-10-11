@@ -243,6 +243,79 @@ class Game:  # pylint: disable=R0902
         print(f"\n>>> {self.mostrar_turno_actual()} <<<")
         print(self.mostrar_dados_disponibles())
 
+    def procesar_entrada_usuario(self, entrada):
+        """Procesa la entrada del usuario y devuelve el movimiento parseado."""
+        entrada = entrada.strip().lower()
+        
+        if entrada == 'quit':
+            return 'quit', None
+        elif entrada == 'pass':
+            return 'pass', None
+        
+        try:
+            partes = entrada.split(',')
+            if len(partes) != 3:
+                return None, "Error: Use formato origen,destino,dado"
+            
+            origen_str = partes[0].strip()
+            destino_str = partes[1].strip()
+            dado = int(partes[2].strip())
+            
+            # Manejo especial para barra y bearing off
+            if origen_str == 'barra':
+                return ('barra', int(destino_str) - 1, dado), None
+            elif destino_str == 'off':
+                return (int(origen_str) - 1, 'off', dado), None
+            else:
+                origen = int(origen_str)
+                destino = int(destino_str)
+                # Convertir a índices (el usuario usa 1-24, el sistema 0-23)
+                return (origen - 1, destino - 1, dado), None
+            
+        except ValueError:
+            return None, "Error: Ingrese números válidos"
+
+    def ejecutar_movimiento_completo(self, origen, destino, dado):
+        """Ejecuta un movimiento completo y devuelve el resultado."""
+        try:
+            # Manejo de reingresar desde barra
+            if origen == 'barra':
+                exito, mensaje = self.ejecutar_movimiento_barra(destino, dado)
+                return exito, f"{'✓' if exito else '✗'} {mensaje}"
+            
+            # Manejo de bearing off
+            elif destino == 'off':
+                exito, mensaje = self.ejecutar_bearing_off(origen, dado)
+                return exito, f"{'✓' if exito else '✗'} {mensaje}"
+            
+            # Movimiento normal
+            else:
+                self.mover(origen, destino, dado)
+                return True, "✓ Movimiento realizado exitosamente"
+                
+        except (MovimientoInvalidoError, DadoNoDisponibleError, 
+                PosicionVaciaError, PosicionBloqueadaError, 
+                MovimientoColorError) as e:
+            return False, f"✗ Error: {e}"
+
+    def verificar_fin_juego_completo(self):
+        """Verifica si el juego ha terminado y muestra el mensaje correspondiente."""
+        if self.verificar_victoria():
+            ganador = self.get_turno()
+            print(f"\n🎉 ¡JUEGO TERMINADO! 🎉")
+            print(f"¡Ganó el jugador {ganador.get_color().upper()}!")
+            return True
+        return False
+
+    def obtener_entrada_usuario(self):
+        """Obtiene la entrada del usuario con las opciones disponibles."""
+        print("\nOpciones:")
+        opciones = self.obtener_opciones_movimiento()
+        for opcion in opciones:
+            print(f"  {opcion}")
+        
+        return input("\n> ")
+
     def turno_completo(self):
         """Ejecuta un turno completo del jugador actual."""
         # Mostrar estado del juego
@@ -257,45 +330,38 @@ class Game:  # pylint: disable=R0902
             print("No hay movimientos disponibles. Pasando turno...")
             return True
         
-        # Mostrar opciones
-        print("\nOpciones:")
-        opciones = self.obtener_opciones_movimiento()
-        for opcion in opciones:
-            print(f"  {opcion}")
-        
-        # Bucle básico de entrada (expandido)
+        # Jugador hace movimientos
+        movimientos_realizados = False
         while self.quedan_movimientos():
-            entrada = input("\n> ").strip().lower()
+            entrada = self.obtener_entrada_usuario()
+            movimiento, error = self.procesar_entrada_usuario(entrada)
             
-            if entrada == 'quit':
+            if movimiento == 'quit':
                 return 'quit'
-            elif entrada == 'pass':
+            elif movimiento == 'pass':
                 print("Pasando turno...")
                 break
-            else:
-                # Procesar entrada básica
-                try:
-                    partes = entrada.split(',')
-                    if len(partes) == 3:
-                        origen_str = partes[0].strip()
-                        destino_str = partes[1].strip()
-                        dado = int(partes[2].strip())
-                        
-                        # Procesar movimientos especiales
-                        if origen_str == 'barra':
-                            destino = int(destino_str) - 1
-                            exito, mensaje = self.ejecutar_movimiento_barra(destino, dado)
-                            print(f"{'✓' if exito else '✗'} {mensaje}")
-                        elif destino_str == 'off':
-                            origen = int(origen_str) - 1
-                            exito, mensaje = self.ejecutar_bearing_off(origen, dado)
-                            print(f"{'✓' if exito else '✗'} {mensaje}")
-                        else:
-                            print("Movimiento normal no implementado aún")
-                    else:
-                        print("Error: Use formato origen,destino,dado")
-                except (ValueError, IndexError):
-                    print("Error: Ingrese números válidos")
+            elif error:
+                print(error)
+                continue
+            elif movimiento is None:
+                continue
+            
+            origen, destino, dado = movimiento
+            
+            exito, mensaje = self.ejecutar_movimiento_completo(origen, destino, dado)
+            print(mensaje)
+            
+            if exito:
+                movimientos_realizados = True
+                
+                # Verificar si el juego terminó
+                if self.verificar_fin_juego_completo():
+                    return 'fin'
+            
+            # Mostrar dados restantes después de un movimiento exitoso
+            if movimientos_realizados:
+                print(self.mostrar_dados_disponibles())
         
         return True
 

@@ -327,4 +327,168 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 - Estandarización final de nomenclatura y convenciones de código
 - Ajustes finales para 100% de cobertura y calidad de código
 
+### Merge pull request #29 - Refactor estructura
+#### Agregado
+- Integración del refactoring completo de estructura
+
+### "agregacion de exepciones"
+#### Agregado
+- Implementación inicial de sistema de excepciones personalizadas
+- Estructura base para manejo de errores del dominio
+
+### Merge pull request #31 - Agregación de excepciones
+#### Agregado
+- Integración del sistema inicial de excepciones
+
+### "mas exepciones"
+#### Agregado
+- Expansión del sistema de excepciones personalizadas
+- Nuevas clases de excepción para casos específicos del juego
+
+### Merge pull request #32 - Más excepciones
+#### Agregado
+- Integración de excepciones adicionales
+
+---
+
+## [1.1.0] - 2025-09-28
+
+### "agregado y aplicado de exepciones"
+#### Agregado
+- Aplicación completa del sistema de excepciones en todas las clases
+- Manejo robusto de errores en toda la aplicación
+
+### Merge pull request #33 - Aplicación de excepciones
+#### Agregado
+- Integración completa del sistema de excepciones aplicado
+
+### "corrección y excepción"
+#### Corregido
+- Ajustes en el sistema de excepciones
+- Correcciones menores en manejo de errores
+#### Agregado
+- Excepciones adicionales según necesidades identificadas
+
+### Merge pull request #34 - Corrección y excepción
+#### Agregado
+- Integración de correcciones y nuevas excepciones
+
+### "mejora pylint y excepcion"
+#### Cambiado
+- Mejoras en calidad de código según estándares pylint
+- Optimización del sistema de excepciones
+#### Corregido
+- Corrección de issues de linting y estilo de código
+
+### Merge pull request #35 - Mejoras pylint y excepciones
+#### Agregado
+- Integración de mejoras de calidad y excepciones
+
+---
+
+## [1.2.0] - 2025-09-30
+
+### "corrección game"
+#### Corregido
+- Correcciones críticas en la clase Game
+- Ajustes en lógica de flujo del juego
+- Mejoras en robustez y estabilidad
+
+### Merge pull request #37 - Corrección Game
+#### Agregado
+- Integración de correcciones importantes en Game
+
+### "primeros pasos cli"
+#### Agregado
+- Inicialización del desarrollo del CLI para Backgammon
+- Estructura básica del módulo CLI
+- Primera aproximación a la interfaz de usuario
+
+### "nueva funcion cli"
+#### Agregado
+- Implementación de nuevas funciones para el CLI
+- Expansión de capacidades de interfaz de usuario
+- Mejoras en la interacción con el jugador
+
+---
+
+## [1.3.0] - 2025-10-01
+
+### "progreso del cli"
+#### Agregado
+- Desarrollo continuo de funcionalidades del CLI
+- Refinamiento de la experiencia de usuario
+- Avances en la integración CLI-core
+
+---
+
+## [1.4.0] - 2025-10-02
+
+### "continuación cli"
+#### Agregado
+- Continuación del desarrollo del CLI
+- Mejoras adicionales en funcionalidad
+- Preparación para refactoring mayor
+
+---
+
+## [2.0.0] - 2025-10-11
+
+### "primeros pasos cli"
+#### Agregado
+- Inicialización del desarrollo del CLI para Backgammon
+- Estructura básica del módulo CLI
+- Primera aproximación a la interfaz de usuario
+
+### "nueva funcion cli"
+#### Agregado
+- Implementación de nuevas funciones para el CLI
+- Expansión de capacidades de interfaz de usuario
+- Mejoras en la interacción con el jugador
+
+### "progreso del cli"
+#### Agregado
+- Desarrollo continuo de funcionalidades del CLI
+- Refinamiento de la experiencia de usuario
+- Avances en la integración CLI-core
+
+### "continuación cli"
+#### Agregado
+- Continuación del desarrollo del CLI
+- Mejoras adicionales en funcionalidad
+- Preparación para refactoring mayor
+
+### "Commit 1: Simplificación mayor del CLI y migración inicial al core"
+#### Cambiado
+- **Simplificación radical del CLI** (289 → 43 líneas, reducción 85%)
+- Eliminación completa de lógica de negocio del CLI
+- CLI reducido a solo funciones de interfaz: `jugar()` y `main()`
+#### Agregado
+- Método `mostrar_tablero()` migrado del CLI a `core/board.py`
+- Método `turno_completo()` básico en `core/game.py`
+- Delegación total de funcionalidad al módulo `core`
+- Separación limpia entre presentación y lógica de negocio
+
+### "corrección cli"
+#### Corregido
+- Ajustes menores en el CLI simplificado
+- Correcciones de bugs en la interfaz
+- Refinamiento de la experiencia de usuario
+
+### "Commit 2: Expandir funcionalidad del core con métodos de UI"
+#### Agregado
+- **Nuevos métodos avanzados en `core/game.py`**:
+  - `todas_fichas_en_home()` - Validación para bearing off
+  - `ejecutar_movimiento_barra()` - Manejo de movimientos desde la barra
+  - `ejecutar_bearing_off()` - Manejo de salida de fichas del tablero
+  - `mostrar_dados_disponibles()` - Display de estado de dados
+  - `mostrar_turno_actual()` - Display de información de turno
+  - `obtener_opciones_movimiento()` - Generación de opciones para el usuario
+  - `mostrar_estado_juego()` - Display completo del estado del juego
+- **Funcionalidades implementadas**:
+  - Sistema de validación de home board
+  - Manejo completo de movimientos especiales (barra y bearing off)
+  - Interface unificada de display de estado
+  - Expansión significativa del método `turno_completo()`
+
 ---
