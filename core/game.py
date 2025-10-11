@@ -135,26 +135,135 @@ class Game:  # pylint: disable=R0902
             return self.__dado__.roll()
         raise AttributeError("El objeto dado no expone método de tirada conocido")
 
+    def todas_fichas_en_home(self, jugador=None):
+        """Verifica si todas las fichas del jugador están en su home board."""
+        if jugador is None:
+            jugador = self.get_turno()
+        
+        tablero = self.get_tablero()
+        color = jugador.get_color()
+        
+        # Home board para blancas: posiciones 19-24 (índices 18-23)
+        # Home board para negras: posiciones 1-6 (índices 0-5)
+        if color == "blanca":
+            fuera_home_range = range(0, 18)
+        else:
+            fuera_home_range = range(6, 24)
+        
+        # Verificar que no haya fichas fuera del home board
+        for i in fuera_home_range:
+            if tablero[i]:
+                for ficha in tablero[i]:
+                    if ficha.obtener_color() == color:
+                        return False
+        
+        # Verificar que no haya fichas en la barra
+        if self.__board__.fichas_en_barra(color) > 0:
+            return False
+            
+        return True
+
+    def ejecutar_movimiento_barra(self, destino, dado):
+        """Ejecuta un movimiento desde la barra."""
+        jugador = self.get_turno()
+        color = jugador.get_color()
+        
+        # Verificar que hay fichas en la barra
+        if self.__board__.fichas_en_barra(color) == 0:
+            return False, "No tienes fichas en la barra"
+        
+        # Verificar que el destino no esté bloqueado
+        tablero = self.get_tablero()
+        fichas_destino = tablero[destino]
+        if (fichas_destino and 
+            fichas_destino[0].obtener_color() != color and 
+            len(fichas_destino) > 1):
+            return False, f"Posición {destino + 1} está bloqueada"
+        
+        # Usar dado y reingresar
+        if not self.usar_valor_dado(dado):
+            return False, f"El dado {dado} no está disponible"
+        
+        self.__board__.reingresar_desde_barra(color, destino)
+        return True, "Ficha reingresada desde la barra"
+
+    def ejecutar_bearing_off(self, origen, dado):
+        """Ejecuta un bearing off."""
+        jugador = self.get_turno()
+        
+        # Verificar que todas las fichas estén en home board
+        if not self.todas_fichas_en_home(jugador):
+            return False, "Todas las fichas deben estar en el home board para bearing off"
+        
+        # Usar dado y sacar ficha
+        if not self.usar_valor_dado(dado):
+            return False, f"El dado {dado} no está disponible"
+        
+        ficha_sacada = self.__board__.sacar_ficha(origen)
+        if ficha_sacada:
+            jugador.sacar_del_tablero(ficha_sacada)
+            return True, "Ficha sacada del tablero (bearing off)"
+        else:
+            return False, f"No hay fichas en posición {origen + 1}"
+
+    def mostrar_dados_disponibles(self):
+        """Devuelve una cadena con los dados disponibles."""
+        dice = self.__dice__
+        if hasattr(dice, '__valores__') and dice.__valores__:
+            return f"Dados disponibles: {dice.__valores__}"
+        else:
+            return "No hay dados disponibles"
+
+    def mostrar_turno_actual(self):
+        """Devuelve información del turno actual."""
+        jugador = self.get_turno()
+        return f"Turno del jugador: {jugador.get_color().upper()}"
+
+    def obtener_opciones_movimiento(self):
+        """Devuelve las opciones de movimiento disponibles para el jugador actual."""
+        jugador = self.get_turno()
+        fichas_en_barra = self.__board__.fichas_en_barra(jugador.get_color())
+        
+        opciones = []
+        if fichas_en_barra > 0:
+            opciones.append("⚠️  Tienes fichas en la barra. Debes reingresarlas primero.")
+            opciones.append("- Reingresar desde barra: barra,destino,dado (ej: barra,3,3)")
+        else:
+            opciones.append("- Movimiento normal: origen,destino,dado (ej: 1,7,6)")
+            opciones.append("- Bearing off: origen,off,dado (ej: 19,off,3)")
+        
+        opciones.append("- Pasar turno: 'pass'")
+        opciones.append("- Salir: 'quit'")
+        
+        return opciones
+
+    def mostrar_estado_juego(self):
+        """Muestra el estado completo del juego."""
+        self.__board__.mostrar_tablero()
+        print(f"\n>>> {self.mostrar_turno_actual()} <<<")
+        print(self.mostrar_dados_disponibles())
+
     def turno_completo(self):
         """Ejecuta un turno completo del jugador actual."""
         # Mostrar estado del juego
-        self.__board__.mostrar_tablero()
-        print(f"\n>>> Turno del jugador: {self.get_turno().get_color().upper()} <<<")
+        self.mostrar_estado_juego()
         
         # Lanzar dados
         self.tirar_dados()
-        dice = self.__dice__
-        if hasattr(dice, '__valores__') and dice.__valores__:
-            print(f"Dados disponibles: {dice.__valores__}")
-        else:
-            print("No hay dados disponibles")
+        print(self.mostrar_dados_disponibles())
         
         # Verificar si hay movimientos disponibles
         if not self.quedan_movimientos():
             print("No hay movimientos disponibles. Pasando turno...")
             return True
         
-        # Bucle básico de entrada (simplificado por ahora)
+        # Mostrar opciones
+        print("\nOpciones:")
+        opciones = self.obtener_opciones_movimiento()
+        for opcion in opciones:
+            print(f"  {opcion}")
+        
+        # Bucle básico de entrada (expandido)
         while self.quedan_movimientos():
             entrada = input("\n> ").strip().lower()
             
@@ -164,7 +273,29 @@ class Game:  # pylint: disable=R0902
                 print("Pasando turno...")
                 break
             else:
-                print("Entrada no reconocida. Use 'pass' o 'quit'")
+                # Procesar entrada básica
+                try:
+                    partes = entrada.split(',')
+                    if len(partes) == 3:
+                        origen_str = partes[0].strip()
+                        destino_str = partes[1].strip()
+                        dado = int(partes[2].strip())
+                        
+                        # Procesar movimientos especiales
+                        if origen_str == 'barra':
+                            destino = int(destino_str) - 1
+                            exito, mensaje = self.ejecutar_movimiento_barra(destino, dado)
+                            print(f"{'✓' if exito else '✗'} {mensaje}")
+                        elif destino_str == 'off':
+                            origen = int(origen_str) - 1
+                            exito, mensaje = self.ejecutar_bearing_off(origen, dado)
+                            print(f"{'✓' if exito else '✗'} {mensaje}")
+                        else:
+                            print("Movimiento normal no implementado aún")
+                    else:
+                        print("Error: Use formato origen,destino,dado")
+                except (ValueError, IndexError):
+                    print("Error: Ingrese números válidos")
         
         return True
 
