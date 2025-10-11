@@ -125,6 +125,41 @@ class Board:
         """Devuelve la cantidad de fichas en un punto dado."""
         return len(self.__contenedor__[punto])
 
+    def mostrar_tablero(self):
+        """Muestra una representación simple del tablero."""
+        print("\n" + "="*60)
+        print("TABLERO DE BACKGAMMON")
+        print("="*60)
+        
+        # Mostrar posiciones 13-24 (parte superior)
+        print("Posiciones 13-24:")
+        for i in range(13, 24):
+            fichas = self.__contenedor__[i]
+            if fichas:
+                color = fichas[0].obtener_color()
+                count = len(fichas)
+                print(f"  {i+1:2d}: {count} fichas {color}")
+        
+        print("\n" + "-"*60)
+        
+        # Mostrar barras
+        barra_blancas = len(self.__barra_blancas__)
+        barra_negras = len(self.__barra_negras__)
+        print(f"BARRA - Blancas: {barra_blancas} | Negras: {barra_negras}")
+        
+        print("-"*60 + "\n")
+        
+        # Mostrar posiciones 1-12 (parte inferior)
+        print("Posiciones 1-12:")
+        for i in range(0, 12):
+            fichas = self.__contenedor__[i]
+            if fichas:
+                color = fichas[0].obtener_color()
+                count = len(fichas)
+                print(f"  {i+1:2d}: {count} fichas {color}")
+        
+        print("="*60)
+
     # Alias en inglés para compatibilidad
     def move(self, from_point, to_point):
         """Alias en inglés para mover()."""
