@@ -135,6 +135,39 @@ class Game:  # pylint: disable=R0902
             return self.__dado__.roll()
         raise AttributeError("El objeto dado no expone método de tirada conocido")
 
+    def turno_completo(self):
+        """Ejecuta un turno completo del jugador actual."""
+        # Mostrar estado del juego
+        self.__board__.mostrar_tablero()
+        print(f"\n>>> Turno del jugador: {self.get_turno().get_color().upper()} <<<")
+        
+        # Lanzar dados
+        self.tirar_dados()
+        dice = self.__dice__
+        if hasattr(dice, '__valores__') and dice.__valores__:
+            print(f"Dados disponibles: {dice.__valores__}")
+        else:
+            print("No hay dados disponibles")
+        
+        # Verificar si hay movimientos disponibles
+        if not self.quedan_movimientos():
+            print("No hay movimientos disponibles. Pasando turno...")
+            return True
+        
+        # Bucle básico de entrada (simplificado por ahora)
+        while self.quedan_movimientos():
+            entrada = input("\n> ").strip().lower()
+            
+            if entrada == 'quit':
+                return 'quit'
+            elif entrada == 'pass':
+                print("Pasando turno...")
+                break
+            else:
+                print("Entrada no reconocida. Use 'pass' o 'quit'")
+        
+        return True
+
 # alias en español para compatibilidad
 BackgammonGame = Game
 # EOF
