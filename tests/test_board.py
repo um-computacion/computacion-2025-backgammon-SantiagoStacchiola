@@ -132,6 +132,38 @@ class TestBoard(unittest.TestCase):
             count = b.contar_punto(i)
             self.assertGreaterEqual(count, 0)
 
+    def test_mostrar_tablero_completo(self):
+        """Test completo de mostrar_tablero con diferentes configuraciones."""
+        from io import StringIO
+        import sys
+        
+        board = Board()
+        
+        # Capturar la salida de mostrar_tablero
+        captured_output = StringIO()
+        sys.stdout = captured_output
+        board.mostrar_tablero()
+        sys.stdout = sys.__stdout__
+        
+        output = captured_output.getvalue()
+        self.assertIn("TABLERO DE BACKGAMMON", output)
+        self.assertIn("Posiciones 13-24:", output)
+        self.assertIn("Posiciones 1-12:", output)
+        self.assertIn("BARRA", output)
+
+    def test_aliases_en_ingles(self):
+        """Test de los métodos alias en inglés."""
+        board = Board()
+        
+        # Test move alias
+        board.move(0, 1)
+        self.assertEqual(board.contar_fichas(0), 1)
+        self.assertEqual(board.contar_fichas(1), 1)
+        
+        # Test point_count alias
+        count = board.point_count(11)
+        self.assertEqual(count, 5)
+
 if __name__ == '__main__':
     unittest.main()
 # EOF

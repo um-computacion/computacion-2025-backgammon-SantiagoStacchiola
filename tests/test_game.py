@@ -216,6 +216,67 @@ class TestGame(unittest.TestCase):  # pylint: disable=too-many-public-methods
         self.assertIsInstance(tablero, list)
         self.assertEqual(len(tablero), 24)
 
+    def test_nuevos_metodos_ui(self):
+        """Test básico de los nuevos métodos de UI."""
+        from core.game import BackgammonGame
+        from core.player import Player
+        
+        # Crear game específico para estos tests
+        game = BackgammonGame(Player("blanca"), Player("negra"))
+        
+        # Test mostrar_dados_disponibles
+        resultado = game.mostrar_dados_disponibles()
+        self.assertIn("No hay dados disponibles", resultado)
+        
+        # Test mostrar_turno_actual
+        resultado = game.mostrar_turno_actual()
+        self.assertIn("Turno del jugador: BLANCA", resultado)
+        
+        # Test obtener_opciones_movimiento
+        opciones = game.obtener_opciones_movimiento()
+        self.assertIsInstance(opciones, list)
+        self.assertTrue(len(opciones) > 0)
+
+    def test_todas_fichas_en_home_basico(self):
+        """Test básico de todas_fichas_en_home."""
+        from core.game import BackgammonGame
+        from core.player import Player
+        
+        game = BackgammonGame(Player("blanca"), Player("negra"))
+        jugador = game.get_turno()
+        
+        # Al inicio, no todas las fichas están en home
+        self.assertFalse(game.todas_fichas_en_home(jugador))
+        
+        # Test con jugador None (usa turno actual)
+        self.assertFalse(game.todas_fichas_en_home())
+
+    def test_procesar_entrada_usuario_basico(self):
+        """Test básico del procesamiento de entrada."""
+        from core.game import BackgammonGame
+        from core.player import Player
+        
+        game = BackgammonGame(Player("blanca"), Player("negra"))
+        
+        # Test quit
+        movimiento, error = game.procesar_entrada_usuario("quit")
+        self.assertEqual(movimiento, "quit")
+        self.assertIsNone(error)
+        
+        # Test pass
+        movimiento, error = game.procesar_entrada_usuario("pass")
+        self.assertEqual(movimiento, "pass")
+        self.assertIsNone(error)
+        
+        # Test formato inválido
+        movimiento, error = game.procesar_entrada_usuario("1,2")
+        self.assertIsNone(movimiento)
+        self.assertIn("Error: Use formato origen,destino,dado", error)
+
+if __name__ == "__main__":
+    unittest.main()
+# EOF
+
 
 if __name__ == "__main__":
     unittest.main()

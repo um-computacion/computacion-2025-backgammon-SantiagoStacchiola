@@ -109,6 +109,13 @@ class TestChecker(unittest.TestCase):
         self.assertTrue(f_negra.puede_mover_a(14))  # diferencia 6
         self.assertFalse(f_negra.puede_mover_a(16)) # diferencia 4 (no válida)
 
+    def test_can_move_alias_en_ingles(self):
+        """Test del método alias en inglés can_move."""
+        f = Ficha("blanca", 5)
+        # Test del alias en inglés
+        self.assertTrue(f.can_move(5, 11))   # diferencia 6
+        self.assertFalse(f.can_move(5, 12))  # diferencia 7 (demasiado)
+
 
 if __name__ == '__main__':
     unittest.main()
