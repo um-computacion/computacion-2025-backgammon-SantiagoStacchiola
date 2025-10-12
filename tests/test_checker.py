@@ -3,7 +3,8 @@
 
 import unittest
 from core.checker import Ficha
-from core.excepcions import JugadorInvalidoError
+from core.excepcions import (JugadorInvalidoError, FichaInvalidaError,
+                           MovimientoInvalidoError)
 
 
 class TestChecker(unittest.TestCase):
@@ -122,12 +123,12 @@ class TestChecker(unittest.TestCase):
         f_barra = Ficha("negra", "barra")
         self.assertTrue(f_barra.esta_en_barra())
         self.assertFalse(f_barra.esta_afuera())
-        
+
         # Test ficha afuera
         f_afuera = Ficha("blanca", "afuera")
         self.assertTrue(f_afuera.esta_afuera())
         self.assertFalse(f_afuera.esta_en_barra())
-        
+
         # Test repr
         f_normal = Ficha("blanca", 3)
         repr_str = repr(f_normal)
@@ -139,12 +140,76 @@ class TestChecker(unittest.TestCase):
         # Test ficha en posición None
         f = Ficha("blanca", None)
         self.assertFalse(f.puede_mover_a(3))
-        
+
         # Test movimiento desde posición 0
         f_inicio = Ficha("negra", 0)
         self.assertTrue(f_inicio.puede_mover_a(1))   # diferencia 1
         self.assertTrue(f_inicio.puede_mover_a(6))   # diferencia 6
         self.assertFalse(f_inicio.puede_mover_a(4))  # diferencia 4 (no válida)
+
+    def test_validaciones_nuevas_ficha(self):
+        """Test de nuevas validaciones de ficha."""
+        # Test validar_nueva_posicion
+        f = Ficha("blanca", 5)
+        self.assertTrue(f.validar_nueva_posicion(10))
+        self.assertTrue(f.validar_nueva_posicion("barra"))
+        self.assertTrue(f.validar_nueva_posicion("afuera"))
+        self.assertFalse(f.validar_nueva_posicion(25))
+        self.assertFalse(f.validar_nueva_posicion("invalid"))
+
+        # Test validar_nueva_posicion como reemplazo de es_posicion_valida
+        self.assertTrue(f.validar_nueva_posicion(15))
+        self.assertFalse(f.validar_nueva_posicion(-1))
+
+        # Test alias en inglés
+        self.assertEqual(f.get_color(), "blanca")
+        self.assertEqual(f.get_position(), 5)
+        self.assertFalse(f.is_on_bar())
+        self.assertFalse(f.is_off_board())
+
+    def test_puede_mover_casos_especiales(self):
+        """Test de puede_mover con casos especiales."""
+        f = Ficha("blanca", 5)
+
+        # Test con valores None
+        self.assertFalse(f.puede_mover(None, 10))
+        self.assertFalse(f.puede_mover(5, None))
+
+        # Test desde barra
+        self.assertTrue(f.puede_mover("barra", 3))
+        self.assertFalse(f.puede_mover("barra", "invalid"))
+
+        # Test hacia afuera
+        self.assertTrue(f.puede_mover(20, "afuera"))
+        self.assertFalse(f.puede_mover("invalid", "afuera"))
+
+        # Test con tipos incorrectos
+        self.assertFalse(f.puede_mover("invalid", 10))
+        self.assertFalse(f.puede_mover(5, "invalid"))
+
+    def test_mover_con_validacion(self):
+        """Test de mover() con validación."""
+
+        f = Ficha("blanca", 5)
+
+        # Movimiento válido
+        f.mover(10)
+        self.assertEqual(f.obtener_posicion(), 10)
+
+        # Movimiento inválido debería lanzar excepción
+        with self.assertRaises(MovimientoInvalidoError):
+            f.mover("invalid_position")
+
+    def test_excepciones_creacion(self):
+        """Test de excepciones en la creación de fichas."""
+
+        # Color inválido
+        with self.assertRaises(JugadorInvalidoError):
+            Ficha("roja", 5)
+
+        # Tipo de color incorrecto
+        with self.assertRaises(FichaInvalidaError):
+            Ficha(123, 5)
 
 
 if __name__ == '__main__':

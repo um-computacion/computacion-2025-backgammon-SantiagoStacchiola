@@ -58,7 +58,7 @@ class TestPlayer(unittest.TestCase):
         f2 = Ficha("blanca")
         p.sacar_del_tablero(f1)
         p.sacar_del_tablero(f2)
-        self.assertTrue(p._tiene_ficha_en_punto(f1.get_posicion()))
+        self.assertTrue(p._tiene_ficha_en_punto(f1.obtener_posicion()))
         self.assertFalse(p._tiene_ficha_en_punto((0, 0)))
 
     def test_has_checker_en_barra(self):

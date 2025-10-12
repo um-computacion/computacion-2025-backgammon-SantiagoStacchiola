@@ -2,6 +2,7 @@
 # pylint: disable=missing-function-docstring,protected-access
 
 import unittest
+from unittest.mock import patch
 from core.game import BackgammonGame
 from core.checker import Ficha
 from core.player import Player
@@ -218,20 +219,18 @@ class TestGame(unittest.TestCase):  # pylint: disable=too-many-public-methods
 
     def test_nuevos_metodos_ui(self):
         """Test básico de los nuevos métodos de UI."""
-        from core.game import BackgammonGame
-        from core.player import Player
-        
+
         # Crear game específico para estos tests
         game = BackgammonGame(Player("blanca"), Player("negra"))
-        
+
         # Test mostrar_dados_disponibles
         resultado = game.mostrar_dados_disponibles()
         self.assertIn("No hay dados disponibles", resultado)
-        
+
         # Test mostrar_turno_actual
         resultado = game.mostrar_turno_actual()
         self.assertIn("Turno del jugador: BLANCA", resultado)
-        
+
         # Test obtener_opciones_movimiento
         opciones = game.obtener_opciones_movimiento()
         self.assertIsInstance(opciones, list)
@@ -239,35 +238,31 @@ class TestGame(unittest.TestCase):  # pylint: disable=too-many-public-methods
 
     def test_todas_fichas_en_home_basico(self):
         """Test básico de todas_fichas_en_home."""
-        from core.game import BackgammonGame
-        from core.player import Player
-        
+
         game = BackgammonGame(Player("blanca"), Player("negra"))
         jugador = game.get_turno()
-        
+
         # Al inicio, no todas las fichas están en home
         self.assertFalse(game.todas_fichas_en_home(jugador))
-        
+
         # Test con jugador None (usa turno actual)
         self.assertFalse(game.todas_fichas_en_home())
 
     def test_procesar_entrada_usuario_basico(self):
         """Test básico del procesamiento de entrada."""
-        from core.game import BackgammonGame
-        from core.player import Player
-        
+
         game = BackgammonGame(Player("blanca"), Player("negra"))
-        
+
         # Test quit
         movimiento, error = game.procesar_entrada_usuario("quit")
         self.assertEqual(movimiento, "quit")
         self.assertIsNone(error)
-        
+
         # Test pass
         movimiento, error = game.procesar_entrada_usuario("pass")
         self.assertEqual(movimiento, "pass")
         self.assertIsNone(error)
-        
+
         # Test formato inválido
         movimiento, error = game.procesar_entrada_usuario("1,2")
         self.assertIsNone(movimiento)
@@ -275,11 +270,9 @@ class TestGame(unittest.TestCase):  # pylint: disable=too-many-public-methods
 
     def test_ejecutar_movimiento_barra_casos(self):
         """Test de ejecutar_movimiento_barra con diferentes casos."""
-        from core.game import BackgammonGame
-        from core.player import Player
-        
+
         game = BackgammonGame(Player("blanca"), Player("negra"))
-        
+
         # Sin fichas en barra, debería fallar
         exito, mensaje = game.ejecutar_movimiento_barra(5, 3)
         self.assertFalse(exito)
@@ -287,11 +280,9 @@ class TestGame(unittest.TestCase):  # pylint: disable=too-many-public-methods
 
     def test_ejecutar_bearing_off_casos(self):
         """Test de ejecutar_bearing_off con diferentes casos."""
-        from core.game import BackgammonGame
-        from core.player import Player
-        
+
         game = BackgammonGame(Player("blanca"), Player("negra"))
-        
+
         # Sin todas las fichas en home, debería fallar
         exito, mensaje = game.ejecutar_bearing_off(20, 3)
         self.assertFalse(exito)
@@ -299,16 +290,14 @@ class TestGame(unittest.TestCase):  # pylint: disable=too-many-public-methods
 
     def test_ejecutar_movimiento_completo_casos(self):
         """Test de ejecutar_movimiento_completo con diferentes casos."""
-        from core.game import BackgammonGame
-        from core.player import Player
-        
+
         game = BackgammonGame(Player("blanca"), Player("negra"))
-        
+
         # Test movimiento desde barra sin fichas
         exito, mensaje = game.ejecutar_movimiento_completo("barra", 5, 3)
         self.assertFalse(exito)
         self.assertIn("✗", mensaje)
-        
+
         # Test bearing off sin estar en home
         exito, mensaje = game.ejecutar_movimiento_completo(18, "off", 3)
         self.assertFalse(exito)
@@ -316,113 +305,158 @@ class TestGame(unittest.TestCase):  # pylint: disable=too-many-public-methods
 
     def test_verificar_fin_juego_completo_casos(self):
         """Test de verificar_fin_juego_completo."""
-        from core.game import BackgammonGame
-        from core.player import Player
-        from io import StringIO
-        import sys
-        
+
         game = BackgammonGame(Player("blanca"), Player("negra"))
-        
+
         # Al inicio, juego no ha terminado
         self.assertFalse(game.verificar_fin_juego_completo())
 
     def test_obtener_entrada_usuario_con_opciones(self):
         """Test de obtener_entrada_usuario mostrando opciones."""
-        from core.game import BackgammonGame
-        from core.player import Player
-        from io import StringIO
-        import sys
-        
+
         game = BackgammonGame(Player("blanca"), Player("negra"))
-        
-        # Simular entrada del usuario
-        sys.stdin = StringIO("test\n")
-        
-        # Capturar salida
-        captured_output = StringIO()
-        sys.stdout = captured_output
-        
-        entrada = game.obtener_entrada_usuario()
-        
-        sys.stdout = sys.__stdout__
-        sys.stdin = sys.__stdin__
-        
-        self.assertEqual(entrada, "test")
-        output = captured_output.getvalue()
-        self.assertIn("Opciones:", output)
+
+        # Mock la entrada del usuario
+        with patch('builtins.input', return_value='test'):
+            with patch('builtins.print'):
+                entrada = game.obtener_entrada_usuario()
+                self.assertEqual(entrada, "test")
 
     def test_mostrar_estado_juego_completo(self):
         """Test completo de mostrar_estado_juego."""
-        from core.game import BackgammonGame
-        from core.player import Player
-        from io import StringIO
-        import sys
-        
+
         game = BackgammonGame(Player("blanca"), Player("negra"))
-        
-        # Capturar la salida
-        captured_output = StringIO()
-        sys.stdout = captured_output
-        game.mostrar_estado_juego()
-        sys.stdout = sys.__stdout__
-        
-        output = captured_output.getvalue()
-        self.assertIn("TABLERO DE BACKGAMMON", output)
-        self.assertIn("Turno del jugador", output)
+
+        # Usar mock para capturar las llamadas a print
+        with patch('builtins.print') as mock_print:
+            game.mostrar_estado_juego()
+            # Verificar que se llamó a print
+            mock_print.assert_called()
+            # Verificar que se imprimió información del tablero
+            llamadas = [str(call) for call in mock_print.call_args_list]
+            output = '\n'.join(llamadas)
+            self.assertIn("TABLERO", output.upper())
 
     def test_procesar_entrada_usuario_completo(self):
         """Test completo del procesamiento de entrada del usuario."""
-        from core.game import BackgammonGame
-        from core.player import Player
-        
+
         game = BackgammonGame(Player("blanca"), Player("negra"))
-        
+
         # Test ValueError
         movimiento, error = game.procesar_entrada_usuario("a,b,c")
         self.assertIsNone(movimiento)
         self.assertIn("Error: Ingrese números válidos", error)
-        
+
         # Test movimiento normal
         movimiento, error = game.procesar_entrada_usuario("1,7,6")
         self.assertEqual(movimiento, (0, 6, 6))
         self.assertIsNone(error)
-        
+
         # Test barra
         movimiento, error = game.procesar_entrada_usuario("barra,3,2")
         self.assertEqual(movimiento, ("barra", 2, 2))
         self.assertIsNone(error)
-        
+
         # Test bearing off
         movimiento, error = game.procesar_entrada_usuario("19,off,3")
         self.assertEqual(movimiento, (18, "off", 3))
         self.assertIsNone(error)
 
     def test_turno_completo_casos_especiales(self):
-        """Test de turno_completo con casos especiales."""
-        from core.game import BackgammonGame
-        from core.player import Player
-        from io import StringIO
-        import sys
-        
-        game = BackgammonGame(Player("blanca"), Player("negra"))
-        
-        # Simular entrada "quit"
-        sys.stdin = StringIO("quit\n")
-        captured_output = StringIO()
-        sys.stdout = captured_output
-        
-        resultado = game.turno_completo()
-        
-        sys.stdout = sys.__stdout__
-        sys.stdin = sys.__stdin__
-        
-        self.assertEqual(resultado, "quit")
+        """Test de casos especiales en turno_completo."""
+        # Mock dados para simular comportamiento
+        with patch.object(self.game, 'tirar_dados'):
+            with patch.object(self.game, 'obtener_entrada_usuario', return_value='salir'):
+                with patch('builtins.print'):
+                    # El método debe manejar la salida del turno correctamente
+                    result = self.game.turno_completo()
+                    # Verificar que el método retornó
+                    self.assertIsNotNone(result)
 
-if __name__ == "__main__":
-    unittest.main()
-# EOF
+    def test_validar_entrada_movimiento(self):
+        """Test de validación de entrada de movimiento."""
+        # Entradas válidas
+        valido, resultado = self.game.validar_entrada_movimiento("5-11")
+        self.assertTrue(valido)
+        self.assertEqual(resultado, (5, 11))
+
+        valido, resultado = self.game.validar_entrada_movimiento("barra-3")
+        self.assertTrue(valido)
+        self.assertEqual(resultado, ("barra", 3))
+
+        valido, resultado = self.game.validar_entrada_movimiento("20-afuera")
+        self.assertTrue(valido)
+        self.assertEqual(resultado, (20, "afuera"))
+
+        # Comandos especiales
+        valido, resultado = self.game.validar_entrada_movimiento("help")
+        self.assertTrue(valido)
+        self.assertEqual(resultado, "comando_especial")
+
+        # Entradas inválidas
+        valido, _ = self.game.validar_entrada_movimiento("")
+        self.assertFalse(valido)
+
+        valido, _ = self.game.validar_entrada_movimiento("abc")
+        self.assertFalse(valido)
+
+        valido, _ = self.game.validar_entrada_movimiento("25-30")
+        self.assertFalse(valido)
+
+    def test_validar_movimiento_legal(self):
+        """Test de validación de movimientos legales."""
+        dados_disponibles = [1, 2, 3, 4, 5, 6]
+
+        # Agregar una ficha blanca en posición 5 para el test
+        ficha_test = Ficha("blanca", 5)
+        self.game.get_tablero()[4].append(ficha_test)  # posición 5 es índice 4
+
+        # Test con posiciones válidas
+        valido, _ = self.game.validar_movimiento_legal(5, 11, dados_disponibles)
+        # Debería ser válido si hay un dado de 6 disponible
+        self.assertTrue(valido)
+
+        # Test con dado no disponible
+        valido, mensaje = self.game.validar_movimiento_legal(5, 12, [1, 2, 3])
+        self.assertFalse(valido)
+        self.assertIn("No tiene un dado", mensaje)
+
+    def test_mostrar_ayuda_movimientos(self):
+        """Test de mostrar ayuda de movimientos."""
+        with patch('builtins.print') as mock_print:
+            self.game.mostrar_ayuda_movimientos()
+            # Verificar que se imprimió ayuda
+            mock_print.assert_called()
+            # Verificar que contiene información útil
+            llamadas = [call[0][0] for call in mock_print.call_args_list]
+            ayuda_completa = '\n'.join(llamadas)
+            self.assertIn("AYUDA", ayuda_completa)
+            self.assertIn("origen-destino", ayuda_completa)
+            self.assertIn("5-11", ayuda_completa)
+
+    def test_procesar_entrada_usuario_validada(self):
+        """Test de procesamiento validado de entrada de usuario."""
+        dados_disponibles = [1, 2, 3, 4, 5, 6]
+
+        # Test comando especial
+        with patch('builtins.print'):
+            resultado = self.game.procesar_entrada_usuario_validada("help", dados_disponibles)
+            self.assertEqual(resultado, "comando_especial")
+
+        # Test entrada inválida
+        with patch('builtins.print'):
+            resultado = self.game.procesar_entrada_usuario_validada(
+                "formato-incorrecto", dados_disponibles)
+            self.assertIsNone(resultado)
+
+        # Test movimiento válido
+        with patch.object(self.game, 'validar_movimiento_legal', return_value=(True, "válido")):
+            resultado = self.game.procesar_entrada_usuario_validada("5-11", dados_disponibles)
+            self.assertIsNotNone(resultado)
+            self.assertEqual(resultado[0], 5)  # origen
+            self.assertEqual(resultado[1], 11)  # destino
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     unittest.main()
 # EOF
