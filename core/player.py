@@ -1,7 +1,5 @@
 """Módulo con la clase que representa a un jugador."""
 
-# pylint: disable=missing-function-docstring
-
 from core.checker import Ficha
 from core.excepcions import JugadorInvalidoError
 
@@ -10,9 +8,9 @@ class Player:
     """Representa a un jugador con su nombre, color y fichas."""
 
     def __init__(self, color: str):
-        """Crea un nuevo jugador con nombre y color."""
+        """Crea un nuevo jugador con color válido."""
         if color not in ["blanca", "negra"]:
-            raise JugadorInvalidoError("Color inválido, debe ser 'blanca' o 'negra'")
+            raise JugadorInvalidoError()
 
         self.__color__ = color
         self.__total_fichas__ = 15
@@ -20,7 +18,7 @@ class Player:
         self.__fuera__ = []            # fichas que ya salieron
 
     def get_color(self):
-        """Muestra el color."""
+        """Devuelve el color del jugador."""
         return self.__color__
 
     def get_total_fichas(self):
@@ -59,13 +57,8 @@ class Player:
 
     def has_checker(self, point):
         """Indica si el jugador tiene fichas en el punto indicado."""
-        # Verificar en fichas que están "afuera"
-        for ficha in self.__fuera__:
-            if ficha.get_posicion() == point:
-                return True
-        # También verificar en la barra
-        for ficha in self.__barra__:
-            if ficha.get_posicion() == point:
+        for ficha in self.__fuera__ + self.__barra__:
+            if ficha.obtener_posicion() == point:
                 return True
         return False
 

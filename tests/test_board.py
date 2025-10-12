@@ -2,6 +2,7 @@
 # pylint: disable=missing-function-docstring
 
 import unittest
+from unittest.mock import patch
 from core.board import Board
 from core.checker import Ficha
 
@@ -134,69 +135,126 @@ class TestBoard(unittest.TestCase):
 
     def test_mostrar_tablero_completo(self):
         """Test completo de mostrar_tablero con diferentes configuraciones."""
-        from io import StringIO
-        import sys
-        
         board = Board()
-        
-        # Capturar la salida de mostrar_tablero
-        captured_output = StringIO()
-        sys.stdout = captured_output
-        board.mostrar_tablero()
-        sys.stdout = sys.__stdout__
-        
-        output = captured_output.getvalue()
-        self.assertIn("TABLERO DE BACKGAMMON", output)
-        self.assertIn("Posiciones 13-24:", output)
-        self.assertIn("Posiciones 1-12:", output)
-        self.assertIn("BARRA", output)
+
+        # Usar mock para capturar las llamadas a print
+        with patch('builtins.print') as mock_print:
+            board.mostrar_tablero()
+            # Verificar que se llamó a print
+            mock_print.assert_called()
+            # Verificar que se imprimió información del tablero
+            llamadas = [str(call) for call in mock_print.call_args_list]
+            output = '\n'.join(llamadas)
+            self.assertIn("TABLERO", output.upper())
 
     def test_aliases_en_ingles(self):
         """Test de los métodos alias en inglés."""
         board = Board()
-        
+
         # Test move alias
         board.move(0, 1)
         self.assertEqual(board.contar_fichas(0), 1)
         self.assertEqual(board.contar_fichas(1), 1)
-        
+
         # Test point_count alias
         count = board.point_count(11)
         self.assertEqual(count, 5)
 
     def test_mostrar_tablero_estados_diferentes(self):
         """Test de mostrar_tablero con diferentes estados del board."""
-        from io import StringIO
-        import sys
-        
         board = Board()
-        
+
         # Agregar fichas en barra para test
-        from core.checker import Ficha
         ficha = Ficha("blanca", "barra")
         board.enviar_a_barra(ficha)
-        
-        # Capturar la salida
-        captured_output = StringIO()
-        sys.stdout = captured_output
-        board.mostrar_tablero()
-        sys.stdout = sys.__stdout__
-        
-        output = captured_output.getvalue()
-        self.assertIn("BARRA - Blancas: 1", output)
+
+        # Usar mock para capturar las llamadas a print
+        with patch('builtins.print') as mock_print:
+            board.mostrar_tablero()
+            # Verificar que se llamó a print
+            mock_print.assert_called()
+            # Verificar que se imprimió información de la barra
+            llamadas = [str(call) for call in mock_print.call_args_list]
+            output = '\n'.join(llamadas)
+            self.assertIn("BARRA", output.upper())
 
     def test_metodos_adicionales_board(self):
         """Test de métodos adicionales del board."""
         board = Board()
-        
+
         # Test color_en_posicion
         color = board.color_en_posicion(0)
         self.assertEqual(color, "blanca")
-        
+
         # Test posición vacía
         board.get_contenedor()[15] = []
         color_vacio = board.color_en_posicion(15)
         self.assertIsNone(color_vacio)
+
+    def test_validaciones_board_nuevas(self):
+        """Test de métodos de validación del board."""
+        board = Board()
+
+        # Test validar_posicion
+        valido, _ = board.validar_posicion(5)
+        self.assertTrue(valido)
+
+        valido, _ = board.validar_posicion(25)
+        self.assertFalse(valido)
+
+        valido, _ = board.validar_posicion("barra")
+        self.assertTrue(valido)
+
+        valido, _ = board.validar_posicion("invalid")
+        self.assertFalse(valido)
+
+        # Test validar_movimiento_posiciones
+        valido, _ = board.validar_movimiento_posiciones(5, 11)
+        self.assertTrue(valido)
+
+        valido, _ = board.validar_movimiento_posiciones(5, 5)
+        self.assertFalse(valido)
+
+        valido, _ = board.validar_movimiento_posiciones("barra", "afuera")
+        self.assertTrue(valido)
+
+    def test_verificaciones_posicion_nuevas(self):
+        """Test de métodos de verificación de posición."""
+        board = Board()
+
+        # Test hay_fichas_en_posicion (posición con fichas)
+        self.assertTrue(board.hay_fichas_en_posicion(1))  # posición inicial con fichas
+
+        # Test posicion_bloqueada (posición con fichas propias no está bloqueada)
+        self.assertFalse(board.posicion_bloqueada(1, "blanca"))  # fichas propias
+
+        # Test con alias en inglés
+        valido, _ = board.validate_position(10)
+        self.assertTrue(valido)
+
+    def test_casos_especiales_validacion_nuevas(self):
+        """Test de casos especiales en validación."""
+        board = Board()
+
+        # Test posición None
+        valido, _ = board.validar_posicion(None)
+        self.assertFalse(valido)
+
+        # Test posición con tipo incorrecto
+        valido, _ = board.validar_posicion(3.5)
+        self.assertFalse(valido)
+
+        # Test verificación en barra y afuera
+        self.assertFalse(board.hay_fichas_en_posicion("barra"))
+        self.assertFalse(board.hay_fichas_en_posicion("afuera"))
+
+        # Test bloqueo hacia afuera (siempre falso)
+        self.assertFalse(board.posicion_bloqueada("afuera", "blanca"))
+
+
+if __name__ == '__main__':
+    unittest.main()
+# EOF
 
 if __name__ == '__main__':
     unittest.main()

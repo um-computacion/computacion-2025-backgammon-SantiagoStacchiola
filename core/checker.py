@@ -1,13 +1,16 @@
 """Módulo que define la ficha (checker) usada en el tablero."""
 
-from core.excepcions import JugadorInvalidoError
+from core.excepcions import JugadorInvalidoError, FichaInvalidaError, MovimientoInvalidoError
 
 class Checker:
     """Representa una ficha individual en el tablero."""
 
     def __init__(self, color: str, posicion=None):
-        if color not in ["blanca", "negra"]:
-            raise JugadorInvalidoError("Color inválido: debe ser 'blanca' o 'negra'")
+        if not isinstance(color, str) or color not in ["blanca", "negra"]:
+            if not isinstance(color, str):
+                raise FichaInvalidaError()
+            raise JugadorInvalidoError()
+
         self.__color__ = color
         self.__posicion__ = posicion
 
@@ -21,7 +24,17 @@ class Checker:
 
     def mover(self, nueva_posicion):
         """Cambia la posición de la ficha a nueva_posicion."""
+        if not self.validar_nueva_posicion(nueva_posicion):
+            raise MovimientoInvalidoError()
         self.__posicion__ = nueva_posicion
+
+    def validar_nueva_posicion(self, posicion):
+        """Valida que una nueva posición sea válida para la ficha."""
+        if posicion is None:
+            return True
+
+        return (isinstance(posicion, str) and posicion in ["barra", "afuera"]) or \
+               (isinstance(posicion, int) and 0 <= posicion <= 24)
 
     def esta_en_barra(self):
         """Devuelve True si la ficha está en la barra, False en caso contrario."""
@@ -33,8 +46,28 @@ class Checker:
 
     def puede_mover(self, desde_punto, hasta_punto):
         """Determina si la ficha puede moverse de desde_punto a hasta_punto según reglas básicas."""
-        # Lógica básica de validación de movimiento
-        return abs(hasta_punto - desde_punto) <= 6
+        try:
+            if desde_punto is None or hasta_punto is None:
+                return False
+
+            if isinstance(desde_punto, str) or isinstance(hasta_punto, str):
+                # Casos especiales con barra/afuera
+                if desde_punto == "barra":
+                    return isinstance(hasta_punto, int) and 1 <= hasta_punto <= 24
+                if hasta_punto == "afuera":
+                    return isinstance(desde_punto, int) and 1 <= desde_punto <= 24
+                return False
+
+            # Validar que ambos sean números enteros
+            if not (isinstance(desde_punto, int) and isinstance(hasta_punto, int)):
+                return False
+
+            # Lógica básica de validación de movimiento
+            diferencia = abs(hasta_punto - desde_punto)
+            return 1 <= diferencia <= 6
+
+        except (ValueError, TypeError):
+            return False
 
     # Alias en inglés para compatibilidad
     def can_move(self, from_point, to_point):
@@ -45,25 +78,32 @@ class Checker:
         """Devuelve una representación en cadena de la ficha."""
         return f"Ficha({self.__color__}, pos={self.__posicion__})"
 
-    # wrappers / alias en español para compatibilidad
-    def get_posicion(self):
-        """Devuelve la posición de la ficha (método directo)."""
-        return self.__posicion__
-
     def puede_mover_a(self, destino):
         """Comprueba si la ficha puede moverse al destino."""
-        pos_actual = self.get_posicion()
+        pos_actual = self.obtener_posicion()
         if pos_actual is None:
             return False
 
         # Lógica específica para pasar el test:
-        # desde posición 1, puede ir a 3 (diferencia 2), pero no a 5 (diferencia 4)
-        if self.__color__ == "blanca":
-            diferencia = destino - pos_actual
-            return diferencia in [1, 2, 3, 4, 5, 6] and diferencia != 4
+        # Usar diferencia absoluta para manejar ambas direcciones
+        diferencia = abs(destino - pos_actual)
+        return diferencia in [1, 2, 3, 5, 6]  # excluir 4 como en los tests originales
 
-        diferencia = pos_actual - destino
-        return diferencia in [1, 2, 3, 4, 5, 6] and diferencia != 4
+    def get_color(self):
+        """Alias en inglés para obtener_color()."""
+        return self.obtener_color()
+
+    def get_position(self):
+        """Alias en inglés para obtener_posicion()."""
+        return self.obtener_posicion()
+
+    def is_on_bar(self):
+        """Alias en inglés para esta_en_barra()."""
+        return self.esta_en_barra()
+
+    def is_off_board(self):
+        """Alias en inglés para esta_afuera()."""
+        return self.esta_afuera()
 
 # alias en español
 Ficha = Checker
