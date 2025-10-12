@@ -273,6 +273,151 @@ class TestGame(unittest.TestCase):  # pylint: disable=too-many-public-methods
         self.assertIsNone(movimiento)
         self.assertIn("Error: Use formato origen,destino,dado", error)
 
+    def test_ejecutar_movimiento_barra_casos(self):
+        """Test de ejecutar_movimiento_barra con diferentes casos."""
+        from core.game import BackgammonGame
+        from core.player import Player
+        
+        game = BackgammonGame(Player("blanca"), Player("negra"))
+        
+        # Sin fichas en barra, debería fallar
+        exito, mensaje = game.ejecutar_movimiento_barra(5, 3)
+        self.assertFalse(exito)
+        self.assertIn("No tienes fichas en la barra", mensaje)
+
+    def test_ejecutar_bearing_off_casos(self):
+        """Test de ejecutar_bearing_off con diferentes casos."""
+        from core.game import BackgammonGame
+        from core.player import Player
+        
+        game = BackgammonGame(Player("blanca"), Player("negra"))
+        
+        # Sin todas las fichas en home, debería fallar
+        exito, mensaje = game.ejecutar_bearing_off(20, 3)
+        self.assertFalse(exito)
+        self.assertIn("Todas las fichas deben estar en el home board", mensaje)
+
+    def test_ejecutar_movimiento_completo_casos(self):
+        """Test de ejecutar_movimiento_completo con diferentes casos."""
+        from core.game import BackgammonGame
+        from core.player import Player
+        
+        game = BackgammonGame(Player("blanca"), Player("negra"))
+        
+        # Test movimiento desde barra sin fichas
+        exito, mensaje = game.ejecutar_movimiento_completo("barra", 5, 3)
+        self.assertFalse(exito)
+        self.assertIn("✗", mensaje)
+        
+        # Test bearing off sin estar en home
+        exito, mensaje = game.ejecutar_movimiento_completo(18, "off", 3)
+        self.assertFalse(exito)
+        self.assertIn("✗", mensaje)
+
+    def test_verificar_fin_juego_completo_casos(self):
+        """Test de verificar_fin_juego_completo."""
+        from core.game import BackgammonGame
+        from core.player import Player
+        from io import StringIO
+        import sys
+        
+        game = BackgammonGame(Player("blanca"), Player("negra"))
+        
+        # Al inicio, juego no ha terminado
+        self.assertFalse(game.verificar_fin_juego_completo())
+
+    def test_obtener_entrada_usuario_con_opciones(self):
+        """Test de obtener_entrada_usuario mostrando opciones."""
+        from core.game import BackgammonGame
+        from core.player import Player
+        from io import StringIO
+        import sys
+        
+        game = BackgammonGame(Player("blanca"), Player("negra"))
+        
+        # Simular entrada del usuario
+        sys.stdin = StringIO("test\n")
+        
+        # Capturar salida
+        captured_output = StringIO()
+        sys.stdout = captured_output
+        
+        entrada = game.obtener_entrada_usuario()
+        
+        sys.stdout = sys.__stdout__
+        sys.stdin = sys.__stdin__
+        
+        self.assertEqual(entrada, "test")
+        output = captured_output.getvalue()
+        self.assertIn("Opciones:", output)
+
+    def test_mostrar_estado_juego_completo(self):
+        """Test completo de mostrar_estado_juego."""
+        from core.game import BackgammonGame
+        from core.player import Player
+        from io import StringIO
+        import sys
+        
+        game = BackgammonGame(Player("blanca"), Player("negra"))
+        
+        # Capturar la salida
+        captured_output = StringIO()
+        sys.stdout = captured_output
+        game.mostrar_estado_juego()
+        sys.stdout = sys.__stdout__
+        
+        output = captured_output.getvalue()
+        self.assertIn("TABLERO DE BACKGAMMON", output)
+        self.assertIn("Turno del jugador", output)
+
+    def test_procesar_entrada_usuario_completo(self):
+        """Test completo del procesamiento de entrada del usuario."""
+        from core.game import BackgammonGame
+        from core.player import Player
+        
+        game = BackgammonGame(Player("blanca"), Player("negra"))
+        
+        # Test ValueError
+        movimiento, error = game.procesar_entrada_usuario("a,b,c")
+        self.assertIsNone(movimiento)
+        self.assertIn("Error: Ingrese números válidos", error)
+        
+        # Test movimiento normal
+        movimiento, error = game.procesar_entrada_usuario("1,7,6")
+        self.assertEqual(movimiento, (0, 6, 6))
+        self.assertIsNone(error)
+        
+        # Test barra
+        movimiento, error = game.procesar_entrada_usuario("barra,3,2")
+        self.assertEqual(movimiento, ("barra", 2, 2))
+        self.assertIsNone(error)
+        
+        # Test bearing off
+        movimiento, error = game.procesar_entrada_usuario("19,off,3")
+        self.assertEqual(movimiento, (18, "off", 3))
+        self.assertIsNone(error)
+
+    def test_turno_completo_casos_especiales(self):
+        """Test de turno_completo con casos especiales."""
+        from core.game import BackgammonGame
+        from core.player import Player
+        from io import StringIO
+        import sys
+        
+        game = BackgammonGame(Player("blanca"), Player("negra"))
+        
+        # Simular entrada "quit"
+        sys.stdin = StringIO("quit\n")
+        captured_output = StringIO()
+        sys.stdout = captured_output
+        
+        resultado = game.turno_completo()
+        
+        sys.stdout = sys.__stdout__
+        sys.stdin = sys.__stdin__
+        
+        self.assertEqual(resultado, "quit")
+
 if __name__ == "__main__":
     unittest.main()
 # EOF
