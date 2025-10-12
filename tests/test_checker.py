@@ -116,6 +116,36 @@ class TestChecker(unittest.TestCase):
         self.assertTrue(f.can_move(5, 11))   # diferencia 6
         self.assertFalse(f.can_move(5, 12))  # diferencia 7 (demasiado)
 
+    def test_estados_especiales_ficha(self):
+        """Test de estados especiales de la ficha."""
+        # Test ficha en barra
+        f_barra = Ficha("negra", "barra")
+        self.assertTrue(f_barra.esta_en_barra())
+        self.assertFalse(f_barra.esta_afuera())
+        
+        # Test ficha afuera
+        f_afuera = Ficha("blanca", "afuera")
+        self.assertTrue(f_afuera.esta_afuera())
+        self.assertFalse(f_afuera.esta_en_barra())
+        
+        # Test repr
+        f_normal = Ficha("blanca", 3)
+        repr_str = repr(f_normal)
+        self.assertIn("blanca", repr_str)
+        self.assertIn("3", repr_str)
+
+    def test_movimientos_casos_limite(self):
+        """Test de movimientos en casos límite."""
+        # Test ficha en posición None
+        f = Ficha("blanca", None)
+        self.assertFalse(f.puede_mover_a(3))
+        
+        # Test movimiento desde posición 0
+        f_inicio = Ficha("negra", 0)
+        self.assertTrue(f_inicio.puede_mover_a(1))   # diferencia 1
+        self.assertTrue(f_inicio.puede_mover_a(6))   # diferencia 6
+        self.assertFalse(f_inicio.puede_mover_a(4))  # diferencia 4 (no válida)
+
 
 if __name__ == '__main__':
     unittest.main()

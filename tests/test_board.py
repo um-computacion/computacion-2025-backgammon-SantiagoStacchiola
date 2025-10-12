@@ -164,6 +164,40 @@ class TestBoard(unittest.TestCase):
         count = board.point_count(11)
         self.assertEqual(count, 5)
 
+    def test_mostrar_tablero_estados_diferentes(self):
+        """Test de mostrar_tablero con diferentes estados del board."""
+        from io import StringIO
+        import sys
+        
+        board = Board()
+        
+        # Agregar fichas en barra para test
+        from core.checker import Ficha
+        ficha = Ficha("blanca", "barra")
+        board.enviar_a_barra(ficha)
+        
+        # Capturar la salida
+        captured_output = StringIO()
+        sys.stdout = captured_output
+        board.mostrar_tablero()
+        sys.stdout = sys.__stdout__
+        
+        output = captured_output.getvalue()
+        self.assertIn("BARRA - Blancas: 1", output)
+
+    def test_metodos_adicionales_board(self):
+        """Test de métodos adicionales del board."""
+        board = Board()
+        
+        # Test color_en_posicion
+        color = board.color_en_posicion(0)
+        self.assertEqual(color, "blanca")
+        
+        # Test posición vacía
+        board.get_contenedor()[15] = []
+        color_vacio = board.color_en_posicion(15)
+        self.assertIsNone(color_vacio)
+
 if __name__ == '__main__':
     unittest.main()
 # EOF

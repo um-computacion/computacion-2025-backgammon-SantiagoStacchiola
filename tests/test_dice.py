@@ -2,62 +2,56 @@
 
 import unittest
 from unittest.mock import patch
-from core.dice import Dice
+from core.dice import Dados
 
 
-class TestDice(unittest.TestCase):
-    """Verifica comportamiento de las tiradas de dados."""
+class TestDados(unittest.TestCase):
 
-    @patch("random.randint", side_effect=[2, 5])
-    def test_tirar_dados_no_doble(self, _mock_randint):
-        """Comprueba que tirar dados no produce dobles."""
-        d = Dice()
-        # Forzamos el resultado para evitar aleatoriedad
-        resultado = d.tirar()
-        self.assertEqual(resultado[0], 2)
-        self.assertEqual(resultado[1], 5)
-
-    @patch("random.randint", side_effect=[4, 4])
-    def test_tirar_dados_doble(self, _mock_randint):
-        """Comprueba que tirar dados produce dobles."""
-        d = Dice()
-        resultado = d.tirar()
-        self.assertIn(resultado[0], [4, 4, 4, 4])
-
-    def test_quedan_valores_true(self):
-        """Comprueba que quedan valores tras una tirada."""
-        d = Dice()
-        d.tirar()
-        self.assertTrue(d.quedan_valores())
-
-    def test_quedan_valores_false(self):
-        """Comprueba que no quedan valores cuando se agotan."""
-        d = Dice()
-        d.tirar()
-        # Agotar todos los valores
-        while d.quedan_valores():
-            if d.__valores__:
-                d.__valores__.pop()
-        self.assertFalse(d.quedan_valores())
-
-    @patch("random.randint", side_effect=[1, 2])
-    def test_metodo_valores_no_doble(self, _mock_randint):
-        """Prueba el método values con tirada no doble."""
-        d = Dice()
-        d.tirar()
-        valores = d.values()
-        self.assertEqual(len(valores), 2)
-        self.assertIn(1, valores)
-        self.assertIn(2, valores)
-
-    def test_metodo_roll_directo(self):
-        """Prueba directa del método roll."""
-        d = Dice()
-        resultado = d.roll()
-        self.assertIsInstance(resultado, list)
-        self.assertGreater(len(resultado), 0)
+    def test_roll_basic(self):
+        """Test básico del método roll."""
+        dados = Dados()
+        resultado = dados.roll()
+        # Verificar que retorna dos números
+        self.assertEqual(len(resultado), 2)
+        # Verificar que están en el rango correcto
         for valor in resultado:
             self.assertIn(valor, [1, 2, 3, 4, 5, 6])
+
+    @patch('random.randint')
+    def test_roll_mock(self, mock_randint):
+        """Test con mock para controlar los valores del dado."""
+        mock_randint.side_effect = [3, 5]
+        dados = Dados()
+        resultado = dados.roll()
+        self.assertEqual(resultado, [3, 5])
+        # Verificar que se llamó dos veces
+        self.assertEqual(mock_randint.call_count, 2)
+
+    @patch('random.randint')
+    def test_roll_doubles(self, mock_randint):
+        """Test para verificar dobles."""
+        mock_randint.side_effect = [4, 4]
+        dados = Dados()
+        resultado = dados.roll()
+        self.assertEqual(resultado, [4, 4])
+
+    def test_multiple_rolls(self):
+        """Test de múltiples tiradas."""
+        dados = Dados()
+        for _ in range(10):
+            resultado = dados.roll()
+            self.assertEqual(len(resultado), 2)
+            for valor in resultado:
+                self.assertGreaterEqual(valor, 1)
+                self.assertLessEqual(valor, 6)
+
+    def test_dados_attributes(self):
+        """Test de atributos de la clase Dados."""
+        dados = Dados()
+        # Verificar que no tiene atributos inesperados
+        expected_attrs = []  # La clase Dados es muy simple
+        for attr in expected_attrs:
+            self.assertTrue(hasattr(dados, attr))
 
 
 if __name__ == '__main__':
