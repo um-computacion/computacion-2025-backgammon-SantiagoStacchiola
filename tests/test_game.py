@@ -457,6 +457,231 @@ class TestGame(unittest.TestCase):  # pylint: disable=too-many-public-methods
             self.assertEqual(resultado[1], 11)  # destino
 
 
+    def test_turno_completo_con_quit(self):
+        """Test de turno_completo cuando el usuario escribe quit."""
+        with patch('builtins.input', return_value='quit'), \
+             patch.object(self.game, 'tirar_dados'), \
+             patch.object(self.game, 'mostrar_dados_disponibles'), \
+             patch.object(self.game, 'quedan_movimientos', return_value=True), \
+             patch('builtins.print'):
+            self.assertEqual(self.game.turno_completo(), 'quit')
+
+    def test_turno_completo_sin_movimientos(self):
+        """Test de turno_completo cuando no quedan movimientos."""
+        with patch.object(self.game, 'tirar_dados'), \
+             patch.object(self.game, 'mostrar_dados_disponibles'), \
+             patch.object(self.game, 'quedan_movimientos', return_value=False), \
+             patch('builtins.print') as mock_print:
+            self.assertTrue(self.game.turno_completo())
+            mock_print.assert_any_call("No hay movimientos disponibles. Pasando turno...")
+
+    def test_turno_completo_con_pass(self):
+        """Test de turno_completo cuando el usuario pasa el turno."""
+        with patch('builtins.input', return_value='pass'), \
+             patch.object(self.game, 'tirar_dados'), \
+             patch.object(self.game, 'mostrar_dados_disponibles'), \
+             patch.object(self.game, 'quedan_movimientos', return_value=True), \
+             patch.object(self.game, 'procesar_entrada_usuario', return_value=('pass', None)), \
+             patch('builtins.print') as mock_print:
+            self.assertTrue(self.game.turno_completo())
+            mock_print.assert_any_call("Pasando turno...")
+
+    def test_turno_completo_movimiento_exitoso(self):
+        """Test de turno_completo con movimiento exitoso."""
+        with patch('builtins.input', side_effect=['1,2,1', 'pass']), \
+             patch.object(self.game, 'tirar_dados'), \
+             patch.object(self.game, 'mostrar_dados_disponibles'), \
+             patch.object(self.game, 'quedan_movimientos', side_effect=[True, True, False]), \
+             patch.object(self.game, 'procesar_entrada_usuario', side_effect=[((0, 1, 1), None), ('pass', None)]), \
+             patch.object(self.game, 'ejecutar_movimiento_completo', return_value=(True, "Movimiento exitoso")), \
+             patch.object(self.game, 'verificar_fin_juego_completo', return_value=False), \
+             patch('builtins.print'):
+            self.assertTrue(self.game.turno_completo())
+
+    def test_turno_completo_fin_de_juego(self):
+        """Test de turno_completo que termina el juego."""
+        with patch('builtins.input', return_value='1,2,1'), \
+             patch.object(self.game, 'tirar_dados'), \
+             patch.object(self.game, 'mostrar_dados_disponibles'), \
+             patch.object(self.game, 'quedan_movimientos', return_value=True), \
+             patch.object(self.game, 'procesar_entrada_usuario', return_value=((0, 1, 1), None)), \
+             patch.object(self.game, 'ejecutar_movimiento_completo', return_value=(True, "Movimiento exitoso")), \
+             patch.object(self.game, 'verificar_fin_juego_completo', return_value=True), \
+             patch('builtins.print'):
+            self.assertEqual(self.game.turno_completo(), 'fin')
+
+    def test_validar_entrada_movimiento_casos_especiales(self):
+        """Test de validar_entrada_movimiento con comandos especiales."""
+        for comando in ["salir", "exit", "quit", "help", "ayuda"]:
+            resultado = self.game.validar_entrada_movimiento(comando)
+            self.assertEqual(resultado, (True, "comando_especial"))
+
+    def test_validar_entrada_movimiento_formatos_incorrectos(self):
+        """Test de validar_entrada_movimiento con formatos incorrectos."""
+        casos = [
+            ("12", "Formato incorrecto. Use: origen-destino (ej: 5-11)"),
+            ("1-2-3", "Formato incorrecto. Use: origen-destino"),
+            ("25-5", "Posición origen debe estar entre 0-24 o 'barra'"),
+            ("abc-5", "Posición origen debe ser un número o 'barra'"),
+            ("5-25", "Posición destino debe estar entre 0-24 o 'afuera'"),
+            ("5-abc", "Posición destino debe ser un número o 'afuera'")
+        ]
+        for entrada, mensaje_esperado in casos:
+            resultado = self.game.validar_entrada_movimiento(entrada)
+            self.assertEqual(resultado, (False, mensaje_esperado))
+
+    def test_validar_entrada_movimiento_casos_validos(self):
+        """Test de validar_entrada_movimiento con entradas válidas."""
+        casos = [
+            ("5-11", (5, 11)),
+            ("barra-5", ("barra", 5)),
+            ("20-afuera", (20, "afuera")),
+            ("0-24", (0, 24))
+        ]
+        for entrada, esperado in casos:
+            resultado = self.game.validar_entrada_movimiento(entrada)
+            self.assertEqual(resultado, (True, esperado))
+
+    def test_procesar_entrada_usuario_casos_basicos(self):
+        """Test de procesar_entrada_usuario con casos básicos."""
+        casos = [
+            ("entrada_invalida", (None, "Error: Use formato origen,destino,dado")),
+            ("quit", ("quit", None)),
+            ("pass", ("pass", None)),
+            ("1,2,1", ((0, 1, 1), None)),
+            ("barra,5,4", (("barra", 4, 4), None)),
+            ("20,off,4", ((19, "off", 4), None)),
+            ("abc,def,ghi", (None, "Error: Ingrese números válidos"))
+        ]
+        for entrada, esperado in casos:
+            resultado = self.game.procesar_entrada_usuario(entrada)
+            self.assertEqual(resultado, esperado)
+
+    def test_obtener_entrada_usuario_sin_opciones(self):
+        """Test de obtener_entrada_usuario sin opciones."""
+        with patch('builtins.input', return_value='entrada_libre'), \
+             patch.object(self.game, 'obtener_opciones_movimiento', return_value=['opcion1', 'opcion2']), \
+             patch('builtins.print') as mock_print:
+            resultado = self.game.obtener_entrada_usuario()
+            self.assertEqual(resultado, 'entrada_libre')
+            mock_print.assert_any_call("\nOpciones:")
+
+    def test_mostrar_ayuda_movimientos_completa(self):
+        """Test completo de mostrar_ayuda_movimientos."""
+        with patch('builtins.print') as mock_print:
+            self.game.mostrar_ayuda_movimientos()
+            
+            # Verificar que se imprimen las líneas esperadas
+            calls = [call.args[0] for call in mock_print.call_args_list]
+            self.assertIn("\n=== AYUDA DE MOVIMIENTOS ===", calls)
+            self.assertIn("Formato: origen-destino", calls)
+            self.assertIn("Ejemplos:", calls)
+
+    def test_tirar_dados_diferentes_metodos(self):
+        """Test de tirar_dados con diferentes tipos de dados."""
+        # Método tirar
+        with patch.object(self.game, '__dado__') as mock_dado:
+            mock_dado.tirar.return_value = [3, 4]
+            del mock_dado.roll
+            resultado = self.game.tirar_dados()
+            self.assertEqual(resultado, [3, 4])
+            mock_dado.tirar.assert_called_once()
+
+        # Método roll
+        with patch.object(self.game, '__dado__') as mock_dado:
+            del mock_dado.tirar
+            mock_dado.roll.return_value = [5, 6]
+            resultado = self.game.tirar_dados()
+            self.assertEqual(resultado, [5, 6])
+            mock_dado.roll.assert_called_once()
+
+        # Sin método conocido
+        with patch.object(self.game, '__dado__') as mock_dado:
+            del mock_dado.tirar
+            del mock_dado.roll
+            with self.assertRaises(AttributeError) as context:
+                self.game.tirar_dados()
+            self.assertIn("no expone método de tirada conocido", str(context.exception))
+
+    def test_turno_completo_casos_error(self):
+        """Test de turno_completo con diferentes tipos de errores."""
+        # Movimiento None
+        with patch('builtins.input', side_effect=['entrada_invalida', 'pass']), \
+             patch.object(self.game, 'tirar_dados'), \
+             patch.object(self.game, 'mostrar_dados_disponibles'), \
+             patch.object(self.game, 'quedan_movimientos', side_effect=[True, True, False]), \
+             patch.object(self.game, 'procesar_entrada_usuario', side_effect=[(None, "Error"), ('pass', None)]), \
+             patch('builtins.print') as mock_print:
+            self.assertTrue(self.game.turno_completo())
+            mock_print.assert_any_call("Error")
+
+        # Error específico
+        with patch('builtins.input', side_effect=['entrada_con_error', 'pass']), \
+             patch.object(self.game, 'tirar_dados'), \
+             patch.object(self.game, 'mostrar_dados_disponibles'), \
+             patch.object(self.game, 'quedan_movimientos', side_effect=[True, True, False]), \
+             patch.object(self.game, 'procesar_entrada_usuario', side_effect=[(None, "Error específico"), ('pass', None)]), \
+             patch('builtins.print') as mock_print:
+            self.assertTrue(self.game.turno_completo())
+            mock_print.assert_any_call("Error específico")
+
+    def test_turno_completo_mostrar_dados_tras_movimiento(self):
+        """Test de turno_completo que muestra dados después de movimiento exitoso."""
+        with patch('builtins.input', side_effect=['1,2,1', 'pass']), \
+             patch.object(self.game, 'tirar_dados'), \
+             patch.object(self.game, 'mostrar_dados_disponibles', return_value="Dados disponibles"), \
+             patch.object(self.game, 'quedan_movimientos', side_effect=[True, True, False]), \
+             patch.object(self.game, 'procesar_entrada_usuario', side_effect=[((0, 1, 1), None), ('pass', None)]), \
+             patch.object(self.game, 'ejecutar_movimiento_completo', return_value=(True, "Movimiento exitoso")), \
+             patch.object(self.game, 'verificar_fin_juego_completo', return_value=False), \
+             patch('builtins.print') as mock_print:
+            self.assertTrue(self.game.turno_completo())
+            calls = [call.args[0] for call in mock_print.call_args_list]
+            self.assertIn("Dados disponibles", calls)
+
+    def test_obtener_entrada_usuario_simple(self):
+        """Test de obtener_entrada_usuario."""
+        with patch('builtins.input', return_value='entrada_libre'), \
+             patch.object(self.game, 'obtener_opciones_movimiento', return_value=['opcion1', 'opcion2']), \
+             patch('builtins.print') as mock_print:
+            resultado = self.game.obtener_entrada_usuario()
+            self.assertEqual(resultado, 'entrada_libre')
+            mock_print.assert_any_call("\nOpciones:")
+
+    def test_mostrar_ayuda_movimientos_contenido(self):
+        """Test de contenido de mostrar_ayuda_movimientos."""
+        with patch('builtins.print') as mock_print:
+            self.game.mostrar_ayuda_movimientos()
+            calls = [call.args[0] for call in mock_print.call_args_list]
+            self.assertIn("\n=== AYUDA DE MOVIMIENTOS ===", calls)
+            self.assertIn("Formato: origen-destino", calls)
+
+    def test_procesar_entrada_usuario_valor_error(self):
+        """Test de procesar_entrada_usuario con ValueError."""
+        resultado = self.game.procesar_entrada_usuario("abc,def,ghi")
+        self.assertEqual(resultado, (None, "Error: Ingrese números válidos"))
+
+    def test_validar_movimiento_legal_excepcion(self):
+        """Test de validar_movimiento_legal que maneja excepciones."""
+        with patch.object(self.game, 'get_turno', side_effect=AttributeError("Test error")):
+            resultado = self.game.validar_movimiento_legal(5, 10, [5])
+            self.assertFalse(resultado[0])
+            self.assertIn("Error al validar movimiento", resultado[1])
+
+    def test_procesar_entrada_usuario_valor_error(self):
+        """Test de procesar_entrada_usuario con ValueError en conversión."""
+        resultado = self.game.procesar_entrada_usuario("abc,def,ghi")
+        self.assertEqual(resultado, (None, "Error: Ingrese números válidos"))
+
+    def test_validar_movimiento_legal_con_excepciones(self):
+        """Test de validar_movimiento_legal que maneja excepciones."""
+        # Simular una excepción en el método
+        with patch.object(self.game, 'get_turno', side_effect=AttributeError("Test error")):
+            resultado = self.game.validar_movimiento_legal(5, 10, [5])
+            self.assertFalse(resultado[0])
+            self.assertIn("Error al validar movimiento", resultado[1])
+
+
 if __name__ == '__main__':
     unittest.main()
 # EOF
