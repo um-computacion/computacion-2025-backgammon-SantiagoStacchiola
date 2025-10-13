@@ -1,4 +1,4 @@
-"""Tests para la clase Checker."""
+"""Tests para la clase Ficha."""
 # pylint: disable=missing-function-docstring
 
 import unittest
@@ -8,7 +8,7 @@ from core.excepcions import (JugadorInvalidoError, FichaInvalidaError,
 
 
 class TestChecker(unittest.TestCase):
-    """Pruebas sobre la ficha (checker)."""
+    """Pruebas sobre la ficha del juego."""
 
     def test_creacion_valida(self):
         """Prueba la creación de una ficha con valores válidos."""
@@ -210,6 +210,36 @@ class TestChecker(unittest.TestCase):
         # Tipo de color incorrecto
         with self.assertRaises(FichaInvalidaError):
             Ficha(123, 5)
+
+    def test_puede_mover_tipos_incorrectos(self):
+        """Test para cubrir línea 63 - validación de tipos incorrectos."""
+        f = Ficha("blanca", 5)
+        
+        # Test con desde_punto string pero no válido
+        resultado = f.puede_mover("invalido", 10)
+        self.assertFalse(resultado)
+        
+        # Test con hasta_punto string pero no válido  
+        resultado = f.puede_mover(5, "invalido")
+        self.assertFalse(resultado)
+
+    def test_puede_mover_excepciones(self):
+        """Test para cubrir líneas 69-70 - manejo de excepciones ValueError/TypeError."""
+        f = Ficha("blanca", 5)
+        
+        # Crear situación que genere excepción interna con operaciones matemáticas
+        resultado = f.puede_mover(float('inf'), 10)
+        self.assertFalse(resultado)
+        
+        resultado = f.puede_mover(5, float('inf'))
+        self.assertFalse(resultado)
+        
+        # Casos que podrían generar TypeError en operaciones internas
+        resultado = f.puede_mover(complex(1, 1), 10)
+        self.assertFalse(resultado)
+        
+        resultado = f.puede_mover(10, complex(1, 1))
+        self.assertFalse(resultado)
 
 
 if __name__ == '__main__':

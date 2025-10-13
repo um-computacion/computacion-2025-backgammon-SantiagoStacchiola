@@ -1,4 +1,4 @@
-"""Módulo que define la ficha (checker) usada en el tablero."""
+"""Módulo que define la ficha usada en el tablero."""
 
 from core.excepcions import JugadorInvalidoError, FichaInvalidaError, MovimientoInvalidoError
 

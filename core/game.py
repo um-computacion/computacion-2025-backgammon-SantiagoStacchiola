@@ -11,7 +11,7 @@ class Game:
     """Controla el flujo de una partida entre dos jugadores."""
 
     def __init__(self, player1=None, player2=None):
-        """Inicializa la partida; players son opcionales para facilitar tests."""
+        """Inicializa la partida; jugadores son opcionales para facilitar tests."""
         self.__players__ = (player1 or Player("blanca"), player2 or Player("negra"))
         self.__turn__ = 0
         self.__turno__ = self.__players__[0]
@@ -111,7 +111,7 @@ class Game:
         raise AttributeError("El objeto dado no expone método de tirada conocido")
 
     def todas_fichas_en_home(self, jugador=None):
-        """Verifica si todas las fichas del jugador están en su home board."""
+        """Verifica si todas las fichas del jugador están en su tablero local."""
         jugador = jugador or self.get_turno()
         tablero, color = self.get_tablero(), jugador.get_color()
 
@@ -144,11 +144,11 @@ class Game:
         return True, "Ficha reingresada desde la barra"
 
     def ejecutar_bearing_off(self, origen, dado):
-        """Ejecuta un bearing off."""
+        """Ejecuta el movimiento de sacar una ficha del tablero."""
         jugador = self.get_turno()
 
         if not self.todas_fichas_en_home(jugador):
-            return False, "Todas las fichas deben estar en el home board para bearing off"
+            return False, "Todas las fichas deben estar en el tablero local para sacar"
 
         if not self.usar_valor_dado(dado):
             return False, f"El dado {dado} no está disponible"
@@ -156,7 +156,7 @@ class Game:
         ficha_sacada = self.__board__.sacar_ficha(origen)
         if ficha_sacada:
             jugador.sacar_del_tablero(ficha_sacada)
-            return True, "Ficha sacada del tablero (bearing off)"
+            return True, "Ficha sacada del tablero"
         return False, f"No hay fichas en posición {origen + 1}"
 
     def mostrar_dados_disponibles(self):
@@ -182,7 +182,7 @@ class Game:
             opciones.append("- Reingresar desde barra: barra,destino,dado (ej: barra,3,3)")
         else:
             opciones.append("- Movimiento normal: origen,destino,dado (ej: 1,7,6)")
-            opciones.append("- Bearing off: origen,off,dado (ej: 19,off,3)")
+            opciones.append("- Sacar ficha: origen,off,dado (ej: 19,off,3)")
 
         opciones.append("- Pasar turno: 'pass'")
         opciones.append("- Salir: 'quit'")
@@ -349,7 +349,7 @@ class Game:
                     distancia = destino if color == "blanca" else 25 - destino
             elif destino == "afuera":
                 if not self.todas_fichas_en_home():
-                    return False, ("No puede hacer bearing off hasta que todas "
+                    return False, ("No puede sacar fichas hasta que todas "
                                    "las fichas estén en home")
                 color = self.get_turno().get_color()
                 distancia = 25 - origen if color == "blanca" else origen
@@ -391,7 +391,7 @@ class Game:
         print("Ejemplos:")
         print("  5-11    : Mover ficha de posición 5 a posición 11")
         print("  barra-3 : Mover ficha de la barra a posición 3")
-        print("  20-afuera : Hacer bearing off de posición 20")
+        print("  20-afuera : Sacar ficha de posición 20")
         print("\nComandos especiales:")
         print("  salir   : Terminar el turno")
         print("  help    : Mostrar esta ayuda")

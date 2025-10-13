@@ -1,4 +1,4 @@
-"""Tests para la clase Board."""
+"""Tests para la clase Tablero."""
 # pylint: disable=missing-function-docstring
 
 import unittest
@@ -101,7 +101,7 @@ class TestBoard(unittest.TestCase):
         self.assertEqual(b.contar_fichas(23), 2)
 
     def test_metodo_mover(self):
-        """Prueba el método mover del board."""
+        """Prueba el método mover del tablero."""
         b = Board()
         # Asegurar que hay fichas en posición 0
         if b.contar_fichas(0) > 0:
@@ -109,7 +109,7 @@ class TestBoard(unittest.TestCase):
             self.assertEqual(b.contar_fichas(1), 1)
 
     def test_metodo_contar_punto(self):
-        """Prueba el método contar_punto del board."""
+        """Prueba el método contar_punto del tablero."""
         b = Board()
         count = b.contar_punto(0)
         self.assertIsInstance(count, int)
@@ -161,7 +161,7 @@ class TestBoard(unittest.TestCase):
         self.assertEqual(count, 5)
 
     def test_mostrar_tablero_estados_diferentes(self):
-        """Test de mostrar_tablero con diferentes estados del board."""
+        """Test de mostrar_tablero con diferentes estados del tablero."""
         board = Board()
 
         # Agregar fichas en barra para test
@@ -179,7 +179,7 @@ class TestBoard(unittest.TestCase):
             self.assertIn("BARRA", output.upper())
 
     def test_metodos_adicionales_board(self):
-        """Test de métodos adicionales del board."""
+        """Test de métodos adicionales del tablero."""
         board = Board()
 
         # Test color_en_posicion
@@ -192,7 +192,7 @@ class TestBoard(unittest.TestCase):
         self.assertIsNone(color_vacio)
 
     def test_validaciones_board_nuevas(self):
-        """Test de métodos de validación del board."""
+        """Test de métodos de validación del tablero."""
         board = Board()
 
         # Test validar_posicion
@@ -251,11 +251,116 @@ class TestBoard(unittest.TestCase):
         # Test bloqueo hacia afuera (siempre falso)
         self.assertFalse(board.posicion_bloqueada("afuera", "blanca"))
 
+    # === TESTS COMMIT 3: COBERTURA LÍNEAS ESPECÍFICAS ===
+
+    def test_validar_movimiento_origen_invalido(self):
+        """Test para cubrir línea 182 - validación de origen inválido."""
+        board = Board()
+        
+        # Test con origen inválido (no barra)
+        valido, mensaje = board.validar_movimiento_posiciones(25, 20)  # Posición 25 inválida
+        self.assertFalse(valido)
+        self.assertIn("Origen inválido", mensaje)
+
+    def test_validar_movimiento_destino_invalido(self):
+        """Test para cubrir línea 191 - validación de destino inválido."""
+        board = Board()
+        
+        # Test con destino inválido (no afuera)  
+        valido, mensaje = board.validar_movimiento_posiciones(1, 25)  # Posición 25 inválida
+        self.assertFalse(valido)
+        self.assertIn("Destino inválido", mensaje)
+
+    def test_hay_fichas_en_barra_por_color(self):
+        """Test para cubrir líneas 203-205 - fichas en barra por color específico."""
+        board = Board()
+        
+        # Poner fichas blancas en barra
+        board.__barra_blancas__.append(Ficha("blanca"))
+        
+        # Test hay fichas blancas en barra
+        self.assertTrue(board.hay_fichas_en_posicion("barra", "blanca"))
+        self.assertFalse(board.hay_fichas_en_posicion("barra", "negra"))
+        
+        # Limpiar y poner fichas negras
+        board.__barra_blancas__ = []
+        board.__barra_negras__.append(Ficha("negra"))
+        
+        # Test hay fichas negras en barra
+        self.assertTrue(board.hay_fichas_en_posicion("barra", "negra"))
+        self.assertFalse(board.hay_fichas_en_posicion("barra", "blanca"))
+
+    def test_hay_fichas_afuera(self):
+        """Test para cubrir línea 214 - verificar fichas afuera."""
+        board = Board()
+        
+        # Las fichas afuera siempre devuelven False
+        self.assertFalse(board.hay_fichas_en_posicion("afuera"))
+        self.assertFalse(board.hay_fichas_en_posicion("afuera", "blanca"))
+        self.assertFalse(board.hay_fichas_en_posicion("afuera", "negra"))
+
+    def test_hay_fichas_posicion_invalida(self):
+        """Test para cubrir línea 218 - posición inválida en hay_fichas."""
+        board = Board()
+        
+        # Test con posición inválida
+        self.assertFalse(board.hay_fichas_en_posicion(25))
+        self.assertFalse(board.hay_fichas_en_posicion(0))
+        self.assertFalse(board.hay_fichas_en_posicion(-1))
+
+    def test_posicion_bloqueada_invalida(self):
+        """Test para cubrir línea 228 - posición inválida se considera bloqueada."""
+        board = Board()
+        
+        # Posición inválida debe considerarse bloqueada
+        self.assertTrue(board.posicion_bloqueada(25, "blanca"))
+        self.assertTrue(board.posicion_bloqueada(0, "negra"))
+        self.assertTrue(board.posicion_bloqueada(-1, "blanca"))
+
+    def test_posicion_bloqueada_vacia(self):
+        """Test para cubrir línea 232 - posición vacía no está bloqueada."""
+        board = Board()
+        
+        # Posición vacía (sin fichas iniciales) no debe estar bloqueada
+        self.assertFalse(board.posicion_bloqueada(3, "blanca"))  # Posición 3 está vacía inicialmente
+        self.assertFalse(board.posicion_bloqueada(4, "negra"))   # Posición 4 está vacía inicialmente
+
+    def test_posicion_bloqueada_fichas_propias(self):
+        """Test para cubrir línea 239 - fichas propias no bloquean.""" 
+        board = Board()
+        
+        # Posición 1 tiene fichas blancas inicialmente
+        # Una ficha blanca no debe estar bloqueada por sus propias fichas
+        self.assertFalse(board.posicion_bloqueada(1, "blanca"))
+        
+        # Posición 24 tiene fichas negras inicialmente  
+        # Una ficha negra no debe estar bloqueada por sus propias fichas
+        self.assertFalse(board.posicion_bloqueada(24, "negra"))
+
+    def test_hay_fichas_color_especifico(self):
+        """Test para cubrir línea 218 - any() con color específico."""
+        board = Board()
+        
+        # Test con color específico en posición con fichas
+        self.assertTrue(board.hay_fichas_en_posicion(1, "blanca"))  # Pos 1 tiene fichas blancas
+        self.assertFalse(board.hay_fichas_en_posicion(1, "negra"))  # Pos 1 NO tiene fichas negras
+
+    def test_posicion_bloqueada_dos_o_mas_fichas(self):
+        """Test para cubrir línea 239 - bloqueo con 2+ fichas enemigas.""" 
+        board = Board()
+        
+        # Crear situación con exactamente 2 fichas enemigas
+        # Pos 6 tiene 5 fichas negras inicialmente - debería bloquear fichas blancas
+        self.assertTrue(board.posicion_bloqueada(6, "blanca"))
+        
+        # Verificar que menos de 2 fichas no bloquea
+        # Poner solo 1 ficha enemiga en una posición vacía
+        from core.checker import Ficha
+        board.__contenedor__[2].append(Ficha("negra"))  # 1 ficha negra en pos 3
+        self.assertFalse(board.posicion_bloqueada(3, "blanca"))  # No bloqueada (solo 1 ficha)
+
 
 if __name__ == '__main__':
     unittest.main()
 # EOF
-
-if __name__ == '__main__':
-    unittest.main()
 # EOF
