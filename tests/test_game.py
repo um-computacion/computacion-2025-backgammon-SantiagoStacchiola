@@ -1,9 +1,9 @@
-"""Tests para la clase Game."""
+"""Tests para la clase Juego."""
 # pylint: disable=missing-function-docstring,protected-access
 
 import unittest
 from unittest.mock import patch
-from core.game import BackgammonGame
+from core.game import Game
 from core.checker import Ficha
 from core.player import Player
 from core.excepcions import (DadoNoDisponibleError, PosicionVaciaError,
@@ -16,7 +16,7 @@ class TestGame(unittest.TestCase):  # pylint: disable=too-many-public-methods
 
     def setUp(self):
         """Inicializa una nueva partida de backgammon antes de cada prueba."""
-        self.game = BackgammonGame()
+        self.game = Game()
 
     def test_inicializacion_y_constructores(self):
         """Prueba la inicialización del juego y constructores."""
@@ -27,15 +27,15 @@ class TestGame(unittest.TestCase):  # pylint: disable=too-many-public-methods
         # Constructor con jugadores personalizados
         p1 = Player("blanca")
         p2 = Player("negra")
-        game = BackgammonGame(p1, p2)
+        game = Game(p1, p2)
         self.assertEqual(game.get_turno().get_color(), "blanca")
 
         # Constructor con un jugador None
-        game2 = BackgammonGame(p1, None)
+        game2 = Game(p1, None)
         self.assertEqual(game2.get_turno().get_color(), "blanca")
 
         # Constructor con ambos None
-        game3 = BackgammonGame(None, None)
+        game3 = Game(None, None)
         self.assertEqual(game3.get_turno().get_color(), "blanca")
 
     def test_turnos_y_estados(self):
@@ -221,7 +221,7 @@ class TestGame(unittest.TestCase):  # pylint: disable=too-many-public-methods
         """Test básico de los nuevos métodos de UI."""
 
         # Crear game específico para estos tests
-        game = BackgammonGame(Player("blanca"), Player("negra"))
+        game = Game(Player("blanca"), Player("negra"))
 
         # Test mostrar_dados_disponibles
         resultado = game.mostrar_dados_disponibles()
@@ -239,7 +239,7 @@ class TestGame(unittest.TestCase):  # pylint: disable=too-many-public-methods
     def test_todas_fichas_en_home_basico(self):
         """Test básico de todas_fichas_en_home."""
 
-        game = BackgammonGame(Player("blanca"), Player("negra"))
+        game = Game(Player("blanca"), Player("negra"))
         jugador = game.get_turno()
 
         # Al inicio, no todas las fichas están en home
@@ -251,7 +251,7 @@ class TestGame(unittest.TestCase):  # pylint: disable=too-many-public-methods
     def test_procesar_entrada_usuario_basico(self):
         """Test básico del procesamiento de entrada."""
 
-        game = BackgammonGame(Player("blanca"), Player("negra"))
+        game = Game(Player("blanca"), Player("negra"))
 
         # Test quit
         movimiento, error = game.procesar_entrada_usuario("quit")
@@ -271,7 +271,7 @@ class TestGame(unittest.TestCase):  # pylint: disable=too-many-public-methods
     def test_ejecutar_movimiento_barra_casos(self):
         """Test de ejecutar_movimiento_barra con diferentes casos."""
 
-        game = BackgammonGame(Player("blanca"), Player("negra"))
+        game = Game(Player("blanca"), Player("negra"))
 
         # Sin fichas en barra, debería fallar
         exito, mensaje = game.ejecutar_movimiento_barra(5, 3)
@@ -281,17 +281,17 @@ class TestGame(unittest.TestCase):  # pylint: disable=too-many-public-methods
     def test_ejecutar_bearing_off_casos(self):
         """Test de ejecutar_bearing_off con diferentes casos."""
 
-        game = BackgammonGame(Player("blanca"), Player("negra"))
+        game = Game(Player("blanca"), Player("negra"))
 
         # Sin todas las fichas en home, debería fallar
         exito, mensaje = game.ejecutar_bearing_off(20, 3)
         self.assertFalse(exito)
-        self.assertIn("Todas las fichas deben estar en el home board", mensaje)
+        self.assertIn("Todas las fichas deben estar en el tablero local", mensaje)
 
     def test_ejecutar_movimiento_completo_casos(self):
         """Test de ejecutar_movimiento_completo con diferentes casos."""
 
-        game = BackgammonGame(Player("blanca"), Player("negra"))
+        game = Game(Player("blanca"), Player("negra"))
 
         # Test movimiento desde barra sin fichas
         exito, mensaje = game.ejecutar_movimiento_completo("barra", 5, 3)
@@ -306,7 +306,7 @@ class TestGame(unittest.TestCase):  # pylint: disable=too-many-public-methods
     def test_verificar_fin_juego_completo_casos(self):
         """Test de verificar_fin_juego_completo."""
 
-        game = BackgammonGame(Player("blanca"), Player("negra"))
+        game = Game(Player("blanca"), Player("negra"))
 
         # Al inicio, juego no ha terminado
         self.assertFalse(game.verificar_fin_juego_completo())
@@ -314,7 +314,7 @@ class TestGame(unittest.TestCase):  # pylint: disable=too-many-public-methods
     def test_obtener_entrada_usuario_con_opciones(self):
         """Test de obtener_entrada_usuario mostrando opciones."""
 
-        game = BackgammonGame(Player("blanca"), Player("negra"))
+        game = Game(Player("blanca"), Player("negra"))
 
         # Mock la entrada del usuario
         with patch('builtins.input', return_value='test'):
@@ -325,7 +325,7 @@ class TestGame(unittest.TestCase):  # pylint: disable=too-many-public-methods
     def test_mostrar_estado_juego_completo(self):
         """Test completo de mostrar_estado_juego."""
 
-        game = BackgammonGame(Player("blanca"), Player("negra"))
+        game = Game(Player("blanca"), Player("negra"))
 
         # Usar mock para capturar las llamadas a print
         with patch('builtins.print') as mock_print:
@@ -340,7 +340,7 @@ class TestGame(unittest.TestCase):  # pylint: disable=too-many-public-methods
     def test_procesar_entrada_usuario_completo(self):
         """Test completo del procesamiento de entrada del usuario."""
 
-        game = BackgammonGame(Player("blanca"), Player("negra"))
+        game = Game(Player("blanca"), Player("negra"))
 
         # Test ValueError
         movimiento, error = game.procesar_entrada_usuario("a,b,c")
@@ -455,7 +455,6 @@ class TestGame(unittest.TestCase):  # pylint: disable=too-many-public-methods
             self.assertIsNotNone(resultado)
             self.assertEqual(resultado[0], 5)  # origen
             self.assertEqual(resultado[1], 11)  # destino
-
 
     def test_turno_completo_con_quit(self):
         """Test de turno_completo cuando el usuario escribe quit."""
@@ -680,14 +679,10 @@ class TestGame(unittest.TestCase):  # pylint: disable=too-many-public-methods
             resultado = self.game.validar_movimiento_legal(5, 10, [5])
             self.assertFalse(resultado[0])
             self.assertIn("Error al validar movimiento", resultado[1])
-
-
-
-    # === TESTS ADICIONALES PARA COMMIT 2 ===
     
     def test_configurar_tablero_inicial_completo(self):
         """Test configuración inicial completa del tablero."""
-        game = BackgammonGame(Player("blanca"), Player("negra"))
+        game = Game(Player("blanca"), Player("negra"))
         
         # Verificar configuración inicial específica
         tablero = game.get_tablero()
@@ -704,7 +699,7 @@ class TestGame(unittest.TestCase):  # pylint: disable=too-many-public-methods
 
     def test_cambio_turno_estados(self):
         """Test cambio de turno y estados internos."""
-        game = BackgammonGame(Player("blanca"), Player("negra"))
+        game = Game(Player("blanca"), Player("negra"))
         
         turno_inicial = game.get_turno()
         game.cambiar_turno()
@@ -719,7 +714,7 @@ class TestGame(unittest.TestCase):  # pylint: disable=too-many-public-methods
 
     def test_constructor_con_jugadores_none(self):
         """Test constructor con jugadores None."""
-        game = BackgammonGame(None, None)
+        game = Game(None, None)
         
         # Debe crear jugadores por defecto
         self.assertEqual(game.get_turno().get_color(), "blanca")
@@ -731,7 +726,7 @@ class TestGame(unittest.TestCase):  # pylint: disable=too-many-public-methods
 
     def test_movimiento_valido_casos_basicos(self):
         """Test casos básicos de movimientos válidos."""
-        game = BackgammonGame(Player("blanca"), Player("negra"))
+        game = Game(Player("blanca"), Player("negra"))
         
         # Testear que el método existe y retorna un booleano
         resultado = game.movimiento_valido(0, 5)  # Pos 1 a 6
@@ -743,7 +738,7 @@ class TestGame(unittest.TestCase):  # pylint: disable=too-many-public-methods
 
     def test_quedan_movimientos_inicial(self):
         """Test que al inicio no quedan movimientos (dados no tirados)."""
-        game = BackgammonGame(Player("blanca"), Player("negra"))
+        game = Game(Player("blanca"), Player("negra"))
         
         # Al inicio los dados no han sido tirados
         resultado = game.quedan_movimientos()

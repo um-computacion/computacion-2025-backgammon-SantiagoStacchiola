@@ -1,4 +1,4 @@
-"""Tests para la clase Player."""
+"""Tests para la clase Jugador."""
 # pylint: disable=missing-function-docstring,protected-access
 
 import unittest
@@ -71,7 +71,7 @@ class TestPlayer(unittest.TestCase):
         self.assertFalse(p.has_checker(99))  # Posición inexistente
 
     def test_has_checker_multiple_locations(self):
-        """Prueba has_checker buscando en múltiples ubicaciones."""
+        """Prueba has_ficha buscando en múltiples ubicaciones."""
         p = Player("negra")
 
         # Ficha en barra
@@ -96,7 +96,7 @@ class TestPlayer(unittest.TestCase):
         self.assertEqual(p.fichas_en_barra(), 0)
 
     def test_has_checker_casos_especificos(self):
-        """Prueba has_checker con casos específicos para cubrir todas las ramas."""
+        """Prueba has_ficha con casos específicos para cubrir todas las ramas."""
         p = Player("blanca")
 
         # Caso 1: ficha en __fuera__ con posición específica
