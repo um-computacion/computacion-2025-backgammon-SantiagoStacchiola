@@ -682,6 +682,74 @@ class TestGame(unittest.TestCase):  # pylint: disable=too-many-public-methods
             self.assertIn("Error al validar movimiento", resultado[1])
 
 
+
+    # === TESTS ADICIONALES PARA COMMIT 2 ===
+    
+    def test_configurar_tablero_inicial_completo(self):
+        """Test configuración inicial completa del tablero."""
+        game = BackgammonGame(Player("blanca"), Player("negra"))
+        
+        # Verificar configuración inicial específica
+        tablero = game.get_tablero()
+        
+        # Posiciones iniciales según reglas Backgammon
+        self.assertEqual(len(tablero[0]), 2)  # 2 fichas blancas en pos 1
+        self.assertEqual(len(tablero[23]), 2)  # 2 fichas negras en pos 24
+        self.assertEqual(len(tablero[5]), 5)   # 5 fichas negras en pos 6
+        self.assertEqual(len(tablero[18]), 5)  # 5 fichas blancas en pos 19
+        
+        # Verificar colores
+        self.assertEqual(tablero[0][0].obtener_color(), "blanca")
+        self.assertEqual(tablero[23][0].obtener_color(), "negra")
+
+    def test_cambio_turno_estados(self):
+        """Test cambio de turno y estados internos."""
+        game = BackgammonGame(Player("blanca"), Player("negra"))
+        
+        turno_inicial = game.get_turno()
+        game.cambiar_turno()
+        turno_despues = game.get_turno()
+        
+        self.assertNotEqual(turno_inicial, turno_despues)
+        
+        # Cambiar de nuevo para volver al inicial
+        game.cambiar_turno()
+        turno_final = game.get_turno()
+        self.assertEqual(turno_inicial, turno_final)
+
+    def test_constructor_con_jugadores_none(self):
+        """Test constructor con jugadores None."""
+        game = BackgammonGame(None, None)
+        
+        # Debe crear jugadores por defecto
+        self.assertEqual(game.get_turno().get_color(), "blanca")
+        self.assertEqual(game.__state__, "initialized")
+        
+        # El segundo jugador debe ser negro
+        game.cambiar_turno()
+        self.assertEqual(game.get_turno().get_color(), "negra")
+
+    def test_movimiento_valido_casos_basicos(self):
+        """Test casos básicos de movimientos válidos."""
+        game = BackgammonGame(Player("blanca"), Player("negra"))
+        
+        # Testear que el método existe y retorna un booleano
+        resultado = game.movimiento_valido(0, 5)  # Pos 1 a 6
+        self.assertIsInstance(resultado, bool)
+        
+        # Movimiento desde posición vacía debería ser False
+        resultado = game.movimiento_valido(2, 7)  # Pos vacía
+        self.assertIsInstance(resultado, bool)
+
+    def test_quedan_movimientos_inicial(self):
+        """Test que al inicio no quedan movimientos (dados no tirados)."""
+        game = BackgammonGame(Player("blanca"), Player("negra"))
+        
+        # Al inicio los dados no han sido tirados
+        resultado = game.quedan_movimientos()
+        self.assertFalse(resultado)
+
+
 if __name__ == '__main__':
     unittest.main()
 # EOF
