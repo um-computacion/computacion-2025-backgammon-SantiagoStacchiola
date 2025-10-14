@@ -50,21 +50,17 @@ class Checker:
             if desde_punto is None or hasta_punto is None:
                 return False
 
+            # Casos especiales con strings
             if isinstance(desde_punto, str) or isinstance(hasta_punto, str):
-                # Casos especiales con barra/afuera
                 if desde_punto == "barra":
                     return isinstance(hasta_punto, int) and 1 <= hasta_punto <= 24
                 if hasta_punto == "afuera":
                     return isinstance(desde_punto, int) and 1 <= desde_punto <= 24
                 return False
 
-            # Validar que ambos sean números enteros
-            if not (isinstance(desde_punto, int) and isinstance(hasta_punto, int)):
-                return False
-
-            # Lógica básica de validación de movimiento
-            diferencia = abs(hasta_punto - desde_punto)
-            return 1 <= diferencia <= 6
+            # Validar que ambos sean números enteros y lógica básica
+            return (isinstance(desde_punto, int) and isinstance(hasta_punto, int) and 
+                   1 <= abs(hasta_punto - desde_punto) <= 6)
 
         except (ValueError, TypeError):
             return False

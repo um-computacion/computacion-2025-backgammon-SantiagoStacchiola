@@ -54,6 +54,14 @@ class TestDados(unittest.TestCase):
         self.assertTrue(hasattr(dados, 'values'))
         self.assertTrue(hasattr(dados, 'tirar'))
 
+    def test_values_method_linea24(self):
+        """Test método values() - línea 24."""
+        dados = Dice()
+        dados.__valores__ = [3, 5]  # Configurar valores específicos
+        resultado = dados.values()  # Ejecutar línea 24
+        self.assertEqual(resultado, (3, 5))
+        self.assertIsInstance(resultado, tuple)
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -60,10 +60,7 @@ class Board:
     def enviar_a_barra(self, ficha: Ficha):
         """Envía una ficha a la barra (fichas capturadas)."""
         ficha.mover("barra")
-        if ficha.obtener_color() == "blanca":
-            self.__barra_blancas__.append(ficha)
-        else:
-            self.__barra_negras__.append(ficha)
+        (self.__barra_blancas__ if ficha.obtener_color() == "blanca" else self.__barra_negras__).append(ficha)
 
     def reingresar_desde_barra(self, color, destino):
         """Reingresa una ficha desde la barra a una posición del tablero."""
@@ -125,7 +122,7 @@ class Board:
 
         # Mostrar posiciones 13-24 (parte superior)
         print("Posiciones 13-24:")
-        for i in range(13, 24):
+        for i in range(12, 24):
             fichas = self.__contenedor__[i]
             if fichas:
                 color = fichas[0].obtener_color()
