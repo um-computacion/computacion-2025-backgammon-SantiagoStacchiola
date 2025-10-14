@@ -491,4 +491,28 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/spec/v2.0.0.h
   - Interface unificada de display de estado
   - Expansión significativa del método `turno_completo()`
 
+### "refacción del codigo siguiendo las pautas"
+#### Cambiado
+- Refactoring general del código para seguir pautas específicas
+- Mejoras en estructura y organización del código
+- Optimizaciones en cumplimiento de estándares
+
+### "mejora de cobertura tests game"
+#### Agregado
+- Ampliación significativa de tests para la clase Game
+- Mejora en porcentaje de cobertura de pruebas
+- Tests adicionales para casos edge y validación
+
+### "tests cli y game"
+#### Agregado
+- Nuevos tests para módulo CLI
+- Tests adicionales para funcionalidades de Game
+- Expansión de la suite de pruebas unitarias
+
+### "mejora board y checker"
+#### Cambiado
+- Mejoras en la clase Board para optimización
+- Optimizaciones en la clase Checker
+- Refinamiento de funcionalidades existentes
+
 ---

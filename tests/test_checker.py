@@ -241,6 +241,38 @@ class TestChecker(unittest.TestCase):
         resultado = f.puede_mover(10, complex(1, 1))
         self.assertFalse(resultado)
 
+    def test_puede_mover_forzar_excepciones_lineas_69_70(self):
+        """Test para forzar excepciones en líneas 69-70."""
+        f = Ficha("blanca", 5)
+        
+        # Crear un objeto que herede de int pero cause problemas en operaciones
+        class ProblematicInt(int):
+            def __new__(cls, value):
+                return int.__new__(cls, value)
+            
+            def __sub__(self, other):
+                raise ValueError("Error forzado en __sub__")
+            
+            def __rsub__(self, other):
+                raise TypeError("Error forzado en __rsub__")
+            
+            def __abs__(self):
+                raise ValueError("Error forzado en __abs__")
+        
+        # Estos objetos pasarán isinstance(x, int) pero fallarán en abs()
+        problematic_5 = ProblematicInt(5)
+        problematic_10 = ProblematicInt(10)
+        
+        # Esto debería activar el except ValueError/TypeError (líneas 69-70)
+        resultado = f.puede_mover(problematic_5, 10)
+        self.assertFalse(resultado)
+        
+        resultado = f.puede_mover(5, problematic_10) 
+        self.assertFalse(resultado)
+        
+        resultado = f.puede_mover(problematic_5, problematic_10)
+        self.assertFalse(resultado)
+
 
 if __name__ == '__main__':
     unittest.main()
