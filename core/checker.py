@@ -33,8 +33,10 @@ class Checker:
         if posicion is None:
             return True
 
-        return (isinstance(posicion, str) and posicion in ["barra", "afuera"]) or \
-               (isinstance(posicion, int) and 0 <= posicion <= 24)
+        return (
+            (isinstance(posicion, str) and posicion in ["barra", "afuera"]) or
+            (isinstance(posicion, int) and 0 <= posicion <= 24)
+        )
 
     def esta_en_barra(self):
         """Devuelve True si la ficha está en la barra, False en caso contrario."""
@@ -59,8 +61,11 @@ class Checker:
                 return False
 
             # Validar que ambos sean números enteros y lógica básica
-            return (isinstance(desde_punto, int) and isinstance(hasta_punto, int) and 
-                   1 <= abs(hasta_punto - desde_punto) <= 6)
+            return (
+                isinstance(desde_punto, int)
+                and isinstance(hasta_punto, int)
+                and 1 <= abs(hasta_punto - desde_punto) <= 6
+            )
 
         except (ValueError, TypeError):
             return False

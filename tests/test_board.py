@@ -353,9 +353,8 @@ class TestBoard(unittest.TestCase):
         # Pos 6 tiene 5 fichas negras inicialmente - debería bloquear fichas blancas
         self.assertTrue(board.posicion_bloqueada(6, "blanca"))
         
-        # Verificar que menos de 2 fichas no bloquea
-        # Poner solo 1 ficha enemiga en una posición vacía
-        from core.checker import Ficha
+    # Verificar que menos de 2 fichas no bloquea
+    # Poner solo 1 ficha enemiga en una posición vacía
         board.__contenedor__[2].append(Ficha("negra"))  # 1 ficha negra en pos 3
         self.assertFalse(board.posicion_bloqueada(3, "blanca"))  # No bloqueada (solo 1 ficha)
 

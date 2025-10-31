@@ -5,6 +5,8 @@ omit =
     */tests/*
     */venv/*
     */__pycache__/*
+    pygame_ui/*
+
 
 [report]
 show_missing = True

@@ -516,3 +516,47 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 - Refinamiento de funcionalidades existentes
 
 ---
+
+## [2.1.0] - 2025-10-14
+
+### "funcionamiento correcto cli"
+#### Cambiado
+- Ajustes finales del CLI para funcionamiento estable end-to-end
+- Refinamiento del flujo de entrada del usuario y mensajes
+#### Corregido
+- Correcciones menores detectadas durante pruebas integradas
+
+### "afinamiento del codigo general"
+#### Cambiado
+- Afinamiento del código en módulos centrales para mayor legibilidad y mantenimiento
+- Pequeñas optimizaciones sin cambios de comportamiento
+
+### Merge pull request #54 - Fase final apartado gráfico CLI
+#### Agregado
+- Integración de las mejoras finales del CLI y afinamiento general del código
+
+---
+
+## [2.2.0] - 2025-10-28
+
+### "compienzo de pygame"
+#### Agregado
+- Inicio del apartado gráfico con Pygame (paquete `pygame_ui/`)
+- Nuevo renderer `BoardView` para dibujar:
+  - Tablero con triángulos superiores/inferiores y numeración
+  - Barra central (bar) y bandeja de borne-off a la derecha
+  - Fichas apiladas con contador cuando exceden el máximo visible
+  - Destinos resaltados y panel de dados
+  - Nombres de jugadores en la parte superior
+- Nuevo `main.py` con:
+  - Menú inicial para ingreso de nombres
+  - Bucle principal de juego con integración a `core.game.Game`
+  - Tirada de dados con ESPACIO, validación de jugadas y cambio de turno automático
+  - Reglas especiales: reingreso desde barra y bearing off cuando corresponde
+  - Overlay de fin de juego con ganador
+
+### Merge pull request #56 - Apartado gráfico Pygame
+#### Agregado
+- Integración del inicio de la interfaz gráfica basada en Pygame
+
+---

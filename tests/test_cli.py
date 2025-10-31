@@ -148,6 +148,65 @@ class TestBackgammonCLI(unittest.TestCase):
         mock_print.assert_any_call(f"\nERROR: {error_msg}")
         mock_print.assert_any_call("El juego terminó inesperadamente.")
 
+    @patch.object(BackgammonCLI, 'mostrar_bienvenida', return_value=False)
+    @patch('builtins.print')
+    def test_jugar_bienvenida_false(self, mock_print, mock_bienvenida):
+        """Cubre la salida temprana de jugar cuando la bienvenida devuelve False."""
+        cli = BackgammonCLI()
+        cli.jugar()
+        # No debería intentar crear Game ni avanzar turnos; solo retorna
+        mock_bienvenida.assert_called_once()
+
+    @patch.object(BackgammonCLI, 'mostrar_bienvenida', return_value=True)
+    @patch('cli.cli.Player')
+    @patch('cli.cli.Game')
+    @patch('builtins.print')
+    def test_jugar_error_inesperado_continua(self, mock_print, mock_game_class, mock_player_class, mock_bienvenida):
+        """Cubre el bloque except Exception en jugar y que continúa luego."""
+        mock_game_instance = unittest.mock.MagicMock()
+        # Primera llamada lanza ValueError, segunda devuelve 'quit'
+        mock_game_instance.turno_completo.side_effect = [ValueError("boom"), 'quit']
+        mock_game_class.return_value = mock_game_instance
+        mock_player_class.side_effect = [unittest.mock.MagicMock(), unittest.mock.MagicMock()]
+
+        cli = BackgammonCLI()
+        cli.set_test_mode(True)  # Evitar pausa entre turnos
+        cli.jugar()
+
+        # Debe haber impreso el error inesperado y luego el mensaje de salida
+        calls = [str(c.args[0]) for c in mock_print.call_args_list if c.args]
+        self.assertTrue(any("ERROR inesperado" in s for s in calls))
+        self.assertTrue(any("Gracias por jugar Backgammon" in s for s in calls))
+
+    @patch.object(BackgammonCLI, 'mostrar_bienvenida', return_value=True)
+    @patch('cli.cli.Player')
+    @patch('cli.cli.Game')
+    @patch('builtins.input', side_effect=StopIteration())
+    @patch('builtins.print')
+    def test_jugar_stopiteration_en_pausa(self, mock_print, mock_input, mock_game_class, mock_player_class, mock_bienvenida):
+        """Cubre el except StopIteration durante la pausa entre turnos."""
+        mock_game_instance = unittest.mock.MagicMock()
+        mock_game_instance.turno_completo.side_effect = ['continua']
+        mock_game_class.return_value = mock_game_instance
+        mock_player_class.side_effect = [unittest.mock.MagicMock(), unittest.mock.MagicMock()]
+
+        cli = BackgammonCLI()
+        cli.set_test_mode(False)  # Forzar pausa de turno
+        cli.jugar()
+
+        calls = [str(c.args[0]) for c in mock_print.call_args_list if c.args]
+        self.assertTrue(any("Entrada agotada" in s for s in calls))
+
+    @patch('builtins.input', side_effect=StopIteration())
+    @patch('builtins.print')
+    def test_mostrar_bienvenida_stopiteration(self, mock_print, mock_input):
+        """Cubre la rama StopIteration en mostrar_bienvenida."""
+        cli = BackgammonCLI()
+        cli.set_test_mode(False)
+        ok = cli.mostrar_bienvenida()
+        self.assertFalse(ok)
+        mock_print.assert_any_call("\n¡Hasta luego!")
+
     @patch('cli.cli.BackgammonCLI')
     @patch('builtins.print')
     def test_main_type_error(self, mock_print, mock_cli_class):
@@ -177,6 +236,45 @@ class TestBackgammonCLI(unittest.TestCase):
         # Verificar que se imprimieron los mensajes de error esperados
         mock_print.assert_any_call(f"\nERROR: {error_msg}")
         mock_print.assert_any_call("El juego terminó inesperadamente.")
+
+    @patch('builtins.input', side_effect=[KeyboardInterrupt()])
+    @patch('builtins.print')
+    def test_mostrar_bienvenida_interrumpida(self, mock_print, mock_input):
+        """Cubre la rama de excepción en mostrar_bienvenida (KeyboardInterrupt)."""
+        cli = BackgammonCLI()
+        cli.set_test_mode(False)  # Forzar ruta 'normal' pero con input parcheado
+        ok = cli.mostrar_bienvenida()
+        self.assertFalse(ok)
+        mock_print.assert_any_call("\n¡Hasta luego!")
+
+    @patch('cli.cli.Player')
+    @patch('cli.cli.Game')
+    @patch('builtins.input', side_effect=[''])
+    @patch('builtins.print')
+    def test_jugar_con_pausa_de_turno(self, mock_print, mock_input, mock_game_class, mock_player_class):
+        """Cubre la rama de pausa entre turnos cuando __test_mode__ es False."""
+        cli = BackgammonCLI()
+        cli.set_test_mode(False)
+
+        # Configurar mocks de Game/Player para evitar lógica real
+        mock_game_instance = unittest.mock.MagicMock()
+        mock_game_instance.turno_completo.side_effect = ['continua', 'quit']
+        mock_game_class.return_value = mock_game_instance
+
+        mock_player1 = unittest.mock.MagicMock()
+        mock_player2 = unittest.mock.MagicMock()
+        mock_player_class.side_effect = [mock_player1, mock_player2]
+
+        # Evitar llamada a input de bienvenida pero mantener pausa entre turnos
+        cli.mostrar_bienvenida = unittest.mock.MagicMock(return_value=True)
+
+        cli.jugar()
+
+        # Debe haberse llamado a cambiar_turno al menos una vez
+        self.assertGreaterEqual(mock_game_instance.cambiar_turno.call_count, 1)
+        # Debe haberse impreso el mensaje de cambio de turno
+        calls = [call.args[0] for call in mock_print.call_args_list if call.args]
+        self.assertTrue(any("Cambiando turno" in str(c) for c in calls))
 
 
     def test_obtener_entrada_usuario_sin_movimientos(self):

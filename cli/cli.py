@@ -21,14 +21,9 @@ class BackgammonCLI:
         print("¡Bienvenido al Backgammon!")
         print("Presiona Enter para comenzar...")
         try:
-            # Protección para tests - solo usar test_mode
-            if self.__test_mode__ or hasattr(input, '_mock_name'):
-                # Hay un mock activo o estamos en modo test, usar el mock
-                input()
-            else:
-                # Ejecución normal
-                input()
-        except (EOFError, KeyboardInterrupt):
+            # Una sola lectura; los tests pueden mockear input sin requerir ramas especiales
+            input()
+        except (EOFError, KeyboardInterrupt, StopIteration):
             print("\n¡Hasta luego!")
             return False
         return True
@@ -50,7 +45,7 @@ class BackgammonCLI:
                 if entrada:
                     return entrada
                 print("Por favor ingresa un comando válido.")
-            except (EOFError, KeyboardInterrupt):
+            except (EOFError, KeyboardInterrupt, StopIteration):
                 print("\n¡Saliendo del juego!")
                 return 'quit'
 
@@ -105,7 +100,11 @@ class BackgammonCLI:
             except (EOFError, KeyboardInterrupt):
                 print("\n\n¡Gracias por jugar!")
                 return
-            except Exception as e:
+            except StopIteration:
+                # Sucede en tests cuando se agota el side_effect del mock de input
+                print("\nEntrada agotada. Saliendo del juego (modo test).")
+                return
+            except Exception as e:  # pylint: disable=broad-exception-caught
                 print(f"\nERROR inesperado: {e}")
                 print("Continuando con el juego...")
                 continue
@@ -121,7 +120,7 @@ def main():
         cli.jugar()
     except KeyboardInterrupt:
         print("\n\n¡Gracias por jugar!")
-    except Exception as e:
+    except Exception as e:  # pylint: disable=broad-exception-caught
         print(f"\nERROR: {e}")
         print("El juego terminó inesperadamente.")
 

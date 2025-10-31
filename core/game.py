@@ -14,7 +14,6 @@ class Game:
         """Inicializa la partida; jugadores son opcionales para facilitar tests."""
         self.__players__ = (player1 or Player("blanca"), player2 or Player("negra"))
         self.__turn__ = 0
-        self.__turno__ = self.__players__[0]
         self.__dice__ = Dice()
         self.__dado__ = self.__dice__
         self.__board__ = Board()
@@ -28,7 +27,6 @@ class Game:
     def cambiar_turno(self):
         """Cambia el turno al otro jugador."""
         self.__turn__ = (self.__turn__ + 1) % 2
-        self.__turno__ = self.__players__[self.__turn__]
         # No resetear dados aquí - se tiran en turno_completo()
 
     def usar_valor_dado(self, valor):
@@ -58,9 +56,6 @@ class Game:
         """Mueve una ficha si el movimiento es válido y el dado corresponde."""
         color = self.__players__[self.__turn__].get_color()
 
-        if not self.usar_valor_dado(valor_dado):
-            raise DadoNoDisponibleError()
-
         fichas_origen = self.__board__.get_fichas(origen)
         if not fichas_origen:
             raise PosicionVaciaError()
@@ -75,6 +70,10 @@ class Game:
 
         if not self.movimiento_valido(origen, destino):
             raise MovimientoInvalidoError()
+
+        # Consumir el dado SOLO después de validar todo
+        if not self.usar_valor_dado(valor_dado):
+            raise DadoNoDisponibleError()
 
         # Realizar captura si es posible
         if (fichas_destino and fichas_destino[0].obtener_color() != color and
@@ -94,7 +93,6 @@ class Game:
     def siguiente_turno(self):
         """Avanza el turno al siguiente jugador y prepara la tirada."""
         self.__turn__ = (self.__turn__ + 1) % 2
-        self.__turno__ = self.__players__[self.__turn__]
         self.__state__ = "waiting"
 
     def next_turn(self):
@@ -108,6 +106,33 @@ class Game:
         if hasattr(self.__dice__, "roll"):
             return self.__dice__.roll()
         raise AttributeError("El objeto dado no expone método de tirada conocido")
+
+    # --- Métodos auxiliares para UI (no afectan lógica ni tests) ---
+    def get_players(self):
+        """Devuelve la tupla de jugadores (blanca, negra)."""
+        return self.__players__
+
+    def get_player_by_color(self, color):
+        """Obtiene el jugador por color ('blanca' o 'negra')."""
+        for p in self.__players__:
+            if p.get_color() == color:
+                return p
+        return None
+
+    def fichas_en_barra(self, color):
+        """Cantidad de fichas de un color en la barra central (desde Board)."""
+        return self.__board__.fichas_en_barra(color)
+
+    def fichas_fuera(self, color):
+        """Cantidad de fichas de un color fuera del tablero (borne-off)."""
+        jugador = self.get_player_by_color(color)
+        return jugador.fichas_fuera() if jugador else 0
+
+    def get_dados_disponibles(self):
+        """Devuelve una copia de los valores de dados aún disponibles."""
+        if hasattr(self.__dice__, '__valores__'):
+            return list(self.__dice__.__valores__)
+        return []
 
     def todas_fichas_en_home(self, jugador=None):
         """Verifica si todas las fichas del jugador están en su tablero local."""
@@ -136,9 +161,18 @@ class Game:
             len(fichas_destino) > 1):
             return False, f"Posición {destino + 1} está bloqueada"
 
+        # Consumir el dado SOLO si el movimiento es legal (no bloqueado)
         if not self.usar_valor_dado(dado):
             return False, f"El dado {dado} no está disponible"
 
+        # Captura si hay exactamente una ficha rival en destino (blot)
+        fichas_destino = self.get_tablero()[destino]
+        if (fichas_destino and fichas_destino[0].obtener_color() != color and
+            len(fichas_destino) == 1):
+            ficha_capturada = self.__board__.quitar_ficha(destino)
+            self.__board__.enviar_a_barra(ficha_capturada)
+
+        # Reingresar la ficha propia desde la barra
         self.__board__.reingresar_desde_barra(color, destino)
         return True, "Ficha reingresada desde la barra"
 
@@ -245,24 +279,12 @@ class Game:
     def obtener_entrada_usuario(self):
         """Obtiene la entrada del usuario con las opciones disponibles."""
         try:
-            # Protección específica para tests - detectar mocks sin imports externos
-            # Verificar si input tiene características de mock
-            if hasattr(input, '_mock_name') or hasattr(input, 'return_value'):
-                # Detectar si print también está siendo mockeado (test específico)
-                if hasattr(print, '_mock_name') or hasattr(print, 'return_value'):
-                    # Test específico que mockea print, mostrar opciones
-                    print("\nOpciones:")
-                    for opcion in self.obtener_opciones_movimiento():
-                        print(f"  {opcion}")
-                # Usar el mock de input
-                return input("\n> ")
-
-            # Ejecución normal, mostrar opciones
+            # Mostrar opciones e ingresar una sola vez (tests pueden mockear input/print)
             print("\nOpciones:")
             for opcion in self.obtener_opciones_movimiento():
                 print(f"  {opcion}")
             return input("\n> ")
-        except (EOFError, KeyboardInterrupt):
+        except (EOFError, KeyboardInterrupt, StopIteration):
             return 'quit'
 
     def turno_completo(self):

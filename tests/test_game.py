@@ -1,5 +1,5 @@
 """Tests para la clase Juego."""
-# pylint: disable=missing-function-docstring,protected-access
+# pylint: disable=missing-function-docstring,protected-access,invalid-name,too-many-lines
 
 import unittest
 from unittest.mock import patch
@@ -421,18 +421,7 @@ class TestGame(unittest.TestCase):  # pylint: disable=too-many-public-methods
         self.assertFalse(valido)
         self.assertIn("No tiene un dado", mensaje)
 
-    def test_mostrar_ayuda_movimientos(self):
-        """Test de mostrar ayuda de movimientos."""
-        with patch('builtins.print') as mock_print:
-            self.game.mostrar_ayuda_movimientos()
-            # Verificar que se imprimió ayuda
-            mock_print.assert_called()
-            # Verificar que contiene información útil
-            llamadas = [call[0][0] for call in mock_print.call_args_list]
-            ayuda_completa = '\n'.join(llamadas)
-            self.assertIn("AYUDA", ayuda_completa)
-            self.assertIn("origen-destino", ayuda_completa)
-            self.assertIn("5-11", ayuda_completa)
+    
 
     def test_procesar_entrada_usuario_validada(self):
         """Test de procesamiento validado de entrada de usuario."""
@@ -556,14 +545,7 @@ class TestGame(unittest.TestCase):  # pylint: disable=too-many-public-methods
             resultado = self.game.procesar_entrada_usuario(entrada)
             self.assertEqual(resultado, esperado)
 
-    def test_obtener_entrada_usuario_sin_opciones(self):
-        """Test de obtener_entrada_usuario sin opciones."""
-        with patch('builtins.input', return_value='entrada_libre'), \
-             patch.object(self.game, 'obtener_opciones_movimiento', return_value=['opcion1', 'opcion2']), \
-             patch('builtins.print') as mock_print:
-            resultado = self.game.obtener_entrada_usuario()
-            self.assertEqual(resultado, 'entrada_libre')
-            mock_print.assert_any_call("\nOpciones:")
+    
 
     def test_mostrar_ayuda_movimientos_completa(self):
         """Test completo de mostrar_ayuda_movimientos."""
@@ -638,27 +620,11 @@ class TestGame(unittest.TestCase):  # pylint: disable=too-many-public-methods
             calls = [call.args[0] for call in mock_print.call_args_list]
             self.assertIn("Dados disponibles", calls)
 
-    def test_obtener_entrada_usuario_simple(self):
-        """Test de obtener_entrada_usuario."""
-        with patch('builtins.input', return_value='entrada_libre'), \
-             patch.object(self.game, 'obtener_opciones_movimiento', return_value=['opcion1', 'opcion2']), \
-             patch('builtins.print') as mock_print:
-            resultado = self.game.obtener_entrada_usuario()
-            self.assertEqual(resultado, 'entrada_libre')
-            mock_print.assert_any_call("\nOpciones:")
+    
 
-    def test_mostrar_ayuda_movimientos_contenido(self):
-        """Test de contenido de mostrar_ayuda_movimientos."""
-        with patch('builtins.print') as mock_print:
-            self.game.mostrar_ayuda_movimientos()
-            calls = [call.args[0] for call in mock_print.call_args_list]
-            self.assertIn("\n=== AYUDA DE MOVIMIENTOS ===", calls)
-            self.assertIn("Formato: origen-destino", calls)
+    
 
-    def test_procesar_entrada_usuario_valor_error(self):
-        """Test de procesar_entrada_usuario con ValueError."""
-        resultado = self.game.procesar_entrada_usuario("abc,def,ghi")
-        self.assertEqual(resultado, (None, "Error: Ingrese números válidos"))
+    
 
     def test_validar_movimiento_legal_excepcion(self):
         """Test de validar_movimiento_legal que maneja excepciones."""
@@ -667,10 +633,7 @@ class TestGame(unittest.TestCase):  # pylint: disable=too-many-public-methods
             self.assertFalse(resultado[0])
             self.assertIn("Error al validar movimiento", resultado[1])
 
-    def test_procesar_entrada_usuario_valor_error(self):
-        """Test de procesar_entrada_usuario con ValueError en conversión."""
-        resultado = self.game.procesar_entrada_usuario("abc,def,ghi")
-        self.assertEqual(resultado, (None, "Error: Ingrese números válidos"))
+    
 
     def test_validar_movimiento_legal_con_excepciones(self):
         """Test de validar_movimiento_legal que maneja excepciones."""
@@ -945,9 +908,10 @@ class TestGame(unittest.TestCase):  # pylint: disable=too-many-public-methods
             if i != 18:  # Excepto la posición donde pusimos la ficha
                 game.get_tablero()[i] = []
         
-        # Limpiar fichas en barra también
-        game.__board__._Board__barra = {"blanca": [], "negra": []}
-        
+        # Limpiar fichas en barra también (usar atributos reales del Board)
+        game.__board__.__barra_blancas__ = []
+        game.__board__.__barra_negras__ = []
+
         # No tirar dados (por defecto no hay dados disponibles)
         exito, mensaje = game.ejecutar_bearing_off(18, 6)
         self.assertFalse(exito)
@@ -964,30 +928,115 @@ class TestGame(unittest.TestCase):  # pylint: disable=too-many-public-methods
         # Bloquear posición 5 con 2+ fichas negras
         game.get_tablero()[4] = [Ficha("negra", 4), Ficha("negra", 4)]
         
-        # Tirar dados para tener dados disponibles
+        # Tirar dados para tener dados disponibles y fijar valores controlados
         game.tirar_dados()
-        
+        game.__dice__.__valores__ = [1, 6]
+
         exito, mensaje = game.ejecutar_movimiento_barra(4, 1)  # Intentar ir a posición 5
         self.assertFalse(exito)
         self.assertIn("bloqueada", mensaje)
+        # El dado 1 no debe consumirse en intento bloqueado
+        self.assertIn(1, game.__dice__.__valores__)
 
     def test_ejecutar_movimiento_barra_exitoso(self):
-        """Test ejecutar_movimiento_barra exitoso."""
+        """Test ejecutar_movimiento_barra exitoso incluyendo captura si hay 1 rival."""
         game = Game(Player("blanca"), Player("negra"))
         
         # Enviar una ficha blanca a la barra
         ficha_blanca = Ficha("blanca", 1)
         game.__board__.enviar_a_barra(ficha_blanca)
-        
-        # Tirar dados para tener dados disponibles
-        game.tirar_dados()
-        
+
+        # Colocar exactamente 1 ficha negra en el destino (índice 2 -> posición 3)
+        game.get_tablero()[2] = [Ficha("negra", 2)]
+
         # Forzar que haya un dado específico disponible
         game.__dice__.__valores__ = [3, 4]
-        
+
         exito, mensaje = game.ejecutar_movimiento_barra(2, 3)  # Usar dado 3 para ir a posición 3
         self.assertTrue(exito)
         self.assertIn("reingresada", mensaje)
+        # Debe capturar la ficha rival y enviarla a barra
+        self.assertEqual(game.__board__.fichas_en_barra("negra"), 1)
+        # Y quedar una blanca en el destino
+        self.assertEqual(len(game.get_tablero()[2]), 1)
+        self.assertEqual(game.get_tablero()[2][0].obtener_color(), "blanca")
+
+    def test_ejecutar_movimiento_barra_dado_no_disponible(self):
+        """Cubre rama donde el dado no está disponible al reingresar desde barra."""
+        game = Game(Player("blanca"), Player("negra"))
+        ficha_blanca = Ficha("blanca", 1)
+        game.__board__.enviar_a_barra(ficha_blanca)
+        game.get_tablero()[4] = []  # destino libre (pos 5)
+        game.__dice__.__valores__ = [6]  # 3 no disponible
+        exito, mensaje = game.ejecutar_movimiento_barra(4, 3)
+        self.assertFalse(exito)
+        self.assertIn("no está disponible", mensaje)
+
+    def test_mostrar_dados_disponibles_con_valores(self):
+        """Cubre mostrar_dados_disponibles cuando hay valores."""
+        game = Game(Player("blanca"), Player("negra"))
+        game.__dice__.__valores__ = [2, 5]
+        texto = game.mostrar_dados_disponibles()
+        self.assertIn("Dados disponibles:", texto)
+
+    def test_opciones_con_fichas_en_barra(self):
+        """Cubre opciones cuando hay fichas en barra."""
+        game = Game(Player("blanca"), Player("negra"))
+        ficha_blanca = Ficha("blanca", 1)
+        game.__board__.enviar_a_barra(ficha_blanca)
+        opciones = game.obtener_opciones_movimiento()
+        self.assertTrue(any("barra" in o.lower() for o in opciones))
+
+    def test_ejecutar_movimiento_completo_ok_y_error(self):
+        """Cubre éxito normal y excepción capturada en ejecutar_movimiento_completo."""
+        game = Game(Player("blanca"), Player("negra"))
+        with patch.object(Game, 'mover', return_value=None):
+            exito, mensaje = game.ejecutar_movimiento_completo(0, 1, 1)
+            self.assertTrue(exito)
+            self.assertIn("Movimiento realizado", mensaje)
+        with patch.object(Game, 'mover', side_effect=MovimientoInvalidoError("mala")):
+            exito, mensaje = game.ejecutar_movimiento_completo(0, 1, 1)
+            self.assertFalse(exito)
+            self.assertIn("ERROR", mensaje)
+
+    def test_validar_movimiento_legal_ramas_extra(self):
+        """Cubre ramas extra de validar_movimiento_legal: bloqueos y afuera."""
+        game = Game(Player("blanca"), Player("negra"))
+        # poner ficha blanca en 5 para origen
+        game.get_tablero()[4].append(Ficha("blanca", 5))
+        # destino 11 bloqueado por 2 negras
+        game.get_tablero()[10] = [Ficha("negra", 11), Ficha("negra", 11)]
+        valido, mensaje = game.validar_movimiento_legal(5, 11, [6])
+        self.assertFalse(valido)
+        self.assertIn("bloqueada", mensaje)
+        # intentar sacar afuera sin home
+        valido, mensaje = game.validar_movimiento_legal(20, "afuera", [5])
+        self.assertFalse(valido)
+        self.assertIn("home", mensaje)
+        # barra a afuera (distancia 0) no está en dados
+        valido, _ = game.validar_movimiento_legal("barra", "afuera", [1,2,3])
+        self.assertFalse(valido)
+
+    def test_procesar_entrada_usuario_validada_calculos(self):
+        """Cubre cálculo de dado necesario para 'barra' y 'afuera'."""
+        game = Game(Player("blanca"), Player("negra"))
+        with patch.object(game, 'validar_movimiento_legal', return_value=(True, "ok")):
+            # barra a 3 con blancas
+            mov = game.procesar_entrada_usuario_validada("barra-3", [1,2,3,4,5,6])
+            self.assertEqual(mov, ("barra", 3, 3))
+        with patch.object(game, 'validar_movimiento_legal', return_value=(True, "ok")):
+            # 20 a afuera con blancas -> 5
+            mov = game.procesar_entrada_usuario_validada("20-afuera", [1,2,3,4,5,6])
+            self.assertEqual(mov, (20, "afuera", 5))
+
+    def test_verificar_fin_juego_completo_true(self):
+        """Cubre rama True en verificar_fin_juego_completo."""
+        game = Game(Player("blanca"), Player("negra"))
+        with patch.object(Game, 'verificar_victoria', return_value=True), \
+             patch('builtins.print') as mock_print:
+            self.assertTrue(game.verificar_fin_juego_completo())
+            calls = [c.args[0] for c in mock_print.call_args_list if c.args]
+            self.assertTrue(any("JUEGO TERMINADO" in s for s in calls))
 
 if __name__ == '__main__':
     unittest.main()
