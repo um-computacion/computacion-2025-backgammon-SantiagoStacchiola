@@ -397,13 +397,10 @@ def main():
                 overlay.blit(txt, (panel.centerx - txt.get_width() // 2, panel.y + 36))
                 overlay.blit(sub, (panel.centerx - sub.get_width() // 2, panel.y + 86))
                 screen.blit(overlay, (0, 0))
-
-
         pygame.display.flip()
         clock.tick(30)
 
     pygame.quit()
-
 
 if __name__ == "__main__":
     main()
