@@ -1,0 +1,20 @@
+[MASTER]
+ignore=venv,.venv,build,dist
+
+[MESSAGES CONTROL]
+disable=
+    C0114,  # missing-module-docstring (some modules are intentionally small)
+    C0115,  # missing-class-docstring (tests/ and small classes)
+    C0116,  # missing-function-docstring (trivial wrappers / tests)
+    R0903,  # too-few-public-methods
+    R0913,  # too-many-arguments (some methods require clarity)
+    R0801,  # duplicate-code (tests/test_* may share setup)
+
+[FORMAT]
+max-line-length=100
+
+[DESIGN]
+max-attributes=15
+
+[REPORTS]
+score=yes
