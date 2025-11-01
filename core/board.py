@@ -251,4 +251,3 @@ class Board:
         """Alias en inglés para validar_posicion()."""
         return self.validar_posicion(position)
 # EOF
- 

@@ -39,11 +39,22 @@ Se usan atributos internos con convención `__nombre__` para reforzar encapsulam
 
 ## Excepciones y manejo de errores
 
-Se definen excepciones específicas del dominio para evitar estados inconsistentes y comunicar causas claras a las interfaces:
+Se definen excepciones específicas del dominio para evitar estados inconsistentes y comunicar causas claras a las interfaces. Principales:
 
 - `MovimientoInvalidoError`
-- `SacarFichaError`
+- `DadoNoDisponibleError`
 - `JugadorInvalidoError`
+- `PosicionVaciaError`
+- `PosicionBloqueadaError`
+- `MovimientoColorError`
+- `JuegoTerminadoError`
+- `ColorInvalidoError`
+- `FichaInvalidaError`
+- `BearingOffInvalidoError` (sacar ficha inválido)
+- `MovimientoBarraError`
+- `TurnoInvalidoError`
+- `ConfiguracionJuegoError`
+- `EstadoJuegoInconsistenteError`
 
 Ubicación y uso:
 
@@ -85,7 +96,51 @@ Algunas consultas y cambios relevantes que guiaron el diseño (ver `prompts-*.md
 
 ## Anexos
 
-- Diagrama de clases ![alt text](image.png)
+Diagrama de clases (Mermaid):
+
+```mermaid
+classDiagram
+	class Game {
+		__players__
+		__board__
+		__dice__
+		__turn__
+		tirar_dados()
+		mover()
+		ejecutar_bearing_off()
+		verificar_victoria()
+	}
+	class Board {
+		__contenedor__
+		__barra_blancas__
+		__barra_negras__
+		mover_ficha()
+		enviar_a_barra()
+		reingresar_desde_barra()
+	}
+	class Player {
+		__color__
+		__total_fichas__
+		__barra__
+		__fuera__
+		fichas_restantes()
+	}
+	class Dice {
+		__valores__
+		roll()
+		values()
+	}
+	class Checker {
+		__color__
+		__posicion__
+		mover()
+	}
+
+	Game --> Board
+	Game --> Player
+	Game --> Dice
+	Board --> Checker
+```
 
 ## Conclusión
 

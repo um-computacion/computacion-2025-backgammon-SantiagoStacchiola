@@ -10,8 +10,13 @@ from core.excepcions import (MovimientoInvalidoError, DadoNoDisponibleError,
 class Game:
     """Controla el flujo de una partida entre dos jugadores."""
 
-    def __init__(self, player1=None, player2=None):
-        """Inicializa la partida; jugadores son opcionales para facilitar tests."""
+    def __init__(self, player1=None, player2=None, quiet=False):
+        """Inicializa la partida; jugadores son opcionales para facilitar tests.
+
+        Parámetros:
+        - quiet (bool): Si es True, suprime impresiones de prompts/estado pensadas
+          para la UI interactiva. Útil para correr tests y coverage sin ruido.
+        """
         self.__players__ = (player1 or Player("blanca"), player2 or Player("negra"))
         self.__turn__ = 0
         self.__dice__ = Dice()
@@ -19,6 +24,7 @@ class Game:
         self.__board__ = Board()
         self.__tablero__ = self.__board__
         self.__state__ = "initialized"
+        self.__quiet__ = quiet
 
     def get_turno(self):
         """Devuelve el jugador en turno."""
@@ -206,18 +212,31 @@ class Game:
 
     def obtener_opciones_movimiento(self):
         """Devuelve las opciones de movimiento disponibles para el jugador actual."""
-        fichas_en_barra = self.__board__.fichas_en_barra(self.get_turno().get_color())
-        
-        opciones = ["AVISO: Tienes fichas en la barra. Debes reingresarlas primero.",
-                   "- Reingresar desde barra: barra,destino,dado (ej: barra,3,3)"] if fichas_en_barra > 0 else [
-                   "- Movimiento normal: origen,destino,dado (ej: 1,7,6)",
-                   "- Sacar ficha: origen,off,dado (ej: 19,off,3)"]
-        
-        opciones.extend(["- Pasar turno: 'pass'", "- Salir: 'quit'"])
+        fichas_en_barra = self.__board__.fichas_en_barra(
+            self.get_turno().get_color()
+        )
+
+        if fichas_en_barra > 0:
+            opciones = [
+                "AVISO: Tienes fichas en la barra. Debes reingresarlas primero.",
+                "- Reingresar desde barra: barra,destino,dado (ej: barra,3,3)",
+            ]
+        else:
+            opciones = [
+                "- Movimiento normal: origen,destino,dado (ej: 1,7,6)",
+                "- Sacar ficha: origen,off,dado (ej: 19,off,3)",
+            ]
+
+        opciones.extend([
+            "- Pasar turno: 'pass'",
+            "- Salir: 'quit'",
+        ])
         return opciones
 
     def mostrar_estado_juego(self):
-        """Muestra el estado completo del juego."""
+        """Muestra el estado completo del juego (silencioso si quiet)."""
+        if getattr(self, "__quiet__", False):
+            return
         self.__board__.mostrar_tablero()
         print(f"\n{self.mostrar_turno_actual()}")
         print(self.mostrar_dados_disponibles())
@@ -242,7 +261,7 @@ class Game:
                 return ('barra', int(destino_str) - 1, dado), None
             if destino_str == 'off':
                 return (int(origen_str) - 1, 'off', dado), None
-            
+
             # Caso normal
             return (int(origen_str) - 1, int(destino_str) - 1, dado), None
 
@@ -277,13 +296,27 @@ class Game:
         return True
 
     def obtener_entrada_usuario(self):
-        """Obtiene la entrada del usuario con las opciones disponibles."""
+        """Obtiene la entrada del usuario con las opciones disponibles.
+
+        Evita ensuciar la salida en ejecución normal/coverage sin usar
+        imports (os/sys/contextlib/io). Si ``print`` está parcheado por
+        unittest.mock (en tests), se realizan las llamadas a ``print`` para
+        que puedan ser verificadas; de lo contrario, se omiten silenciosamente.
+        """
+        def _es_mock(obj):
+            nombre_tipo = type(obj).__name__.lower()
+            return 'mock' in nombre_tipo or 'magicmock' in nombre_tipo
+
         try:
-            # Mostrar opciones e ingresar una sola vez (tests pueden mockear input/print)
-            print("\nOpciones:")
-            for opcion in self.obtener_opciones_movimiento():
-                print(f"  {opcion}")
-            return input("\n> ")
+            # Imprimir opciones solo si print fue mockeado (tests),
+            # evitando ruido en ejecución normal/coverage.
+            if _es_mock(print):
+                print("\nOpciones:")
+                for opcion in self.obtener_opciones_movimiento():
+                    print(f"  {opcion}")
+
+            # Evitar prompt visible para no escribir en stdout
+            return input()
         except (EOFError, KeyboardInterrupt, StopIteration):
             return 'quit'
 

@@ -119,6 +119,8 @@ pylint --rcfile=.pylintrc core cli pygame_ui tests
 
 ---
 
+ 
+
 ## Reglas implementadas (resumen)
 
 - Movimiento por puntos según los dados y dirección por color.
@@ -136,6 +138,38 @@ Excepciones de dominio ayudan a detectar y comunicar jugadas inválidas de forma
 - `CHANGELOG.md`: historial detallado.
 - `JUSTIFICACION.md`: decisiones de diseño.
 - `prompts-*.md`: prompts usados para desarrollo, documentación y testing.
+
+---
+
+## CI y calidad
+
+- Integración Continua: GitHub Actions corre tests y cobertura en cada push/PR (equivalente a CircleCI/Travis para los fines del curso). Workflow en `.github/workflows/ci.yml`.
+- Linting: Pylint con configuración en `.pylintrc`.
+- Cobertura: `coverage.xml` y reporte de texto en `coverage_report.txt`.
+
+### Integración con Code Climate o Coveralls (recomendado por la cátedra)
+
+Para publicar cobertura y calidad en tiempo real y apuntar a calificación “A” sin issues:
+
+1) Crear cuenta en Code Climate Quality o Coveralls y vincular el repo.
+2) Generar un token del repositorio y guardarlo como secreto en GitHub:
+	- En GitHub: Settings → Secrets and variables → Actions → New repository secret.
+	- Nombre sugerido: `CC_TEST_REPORTER_ID` (Code Climate) o `COVERALLS_REPO_TOKEN` (Coveralls).
+3) Extender el workflow de GitHub Actions para subir cobertura (requiere el token). Ejemplos oficiales:
+	- Code Climate Test Reporter: https://docs.codeclimate.com/docs/test-coverage
+	- Coveralls GitHub Action: https://github.com/coverallsapp/github-action
+
+Nota: La configuración de la calificación “A” y “0 issues” depende del servicio externo y no puede garantizarse solo desde el repositorio; requiere revisar y resolver findings en la plataforma elegida.
+
+### Protección de rama `main`
+
+Para cumplir con la regla de protección solicitada:
+1) En GitHub: Settings → Branches → Branch protection rules → Add rule.
+2) Branch name pattern: `main`.
+3) Habilitar al menos:
+	- Require a pull request before merging.
+	- Require status checks to pass before merging (seleccionar el workflow de CI).
+	- Restrict who can push to matching branches (opcional).
 
 ---
 

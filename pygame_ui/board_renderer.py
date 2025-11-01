@@ -119,6 +119,47 @@ class BoardView:
             screen.blit(num, (self._col_x(i) + 10, bottom_num_y))
 
     # ------------------------------------------------------------------
+    def draw_menu(self, screen, nombre_blancas: str, nombre_negras: str, activo: str, cursor_on: bool):
+        """Dibuja la pantalla de menú inicial para ingresar nombres.
+
+        activo: "blancas" o "negras" indica cuál input tiene foco visual.
+        cursor_on: si True, muestra un cursor parpadeante al final del texto activo.
+        """
+        screen.fill((235, 225, 195))
+
+        titulo = self.message_font.render("Backgammon", True, BLACK)
+        small = pygame.font.SysFont("arial", 20)
+        subt = small.render("Ingrese nombres y presione ENTER", True, BLACK)
+        screen.blit(titulo, (self.width // 2 - titulo.get_width() // 2, 80))
+        screen.blit(subt, (self.width // 2 - subt.get_width() // 2, 120))
+
+        etiqueta1 = small.render("Jugador BLANCAS:", True, BLACK)
+        etiqueta2 = small.render("Jugador NEGRAS:", True, BLACK)
+        screen.blit(etiqueta1, (self.width // 2 - 180, self.height // 2 - 90))
+        screen.blit(etiqueta2, (self.width // 2 - 180, self.height // 2 - 20))
+
+        caja_w, caja_h = 360, 42
+        cx = self.width // 2 - caja_w // 2
+        y_blancas = self.height // 2 - 60
+        y_negras = self.height // 2 + 10
+
+        for texto, y, es_activo in [
+            (nombre_blancas, y_blancas, activo == "blancas"),
+            (nombre_negras, y_negras, activo == "negras"),
+        ]:
+            rect = pygame.Rect(cx, y, caja_w, caja_h)
+            pygame.draw.rect(screen, WHITE, rect, border_radius=6)
+            pygame.draw.rect(screen, BLACK, rect, 2, border_radius=6)
+            mostrar = texto
+            if es_activo and cursor_on:
+                mostrar += "|"
+            texto_render = self.message_font.render(mostrar or " ", True, BLACK)
+            screen.blit(texto_render, (rect.x + 10, rect.y + 6))
+
+        hint = small.render("TAB cambia de campo | ESC para salir", True, BLACK)
+        screen.blit(hint, (self.width // 2 - hint.get_width() // 2, self.height - 80))
+
+    # ------------------------------------------------------------------
     def draw_checkers(self, screen, game):
         """Dibuja las fichas en puntos, barra central y bandeja de borne-off."""
         board = game.get_tablero()
@@ -428,3 +469,25 @@ class BoardView:
             txt = self.message_font.render(f"Blancas: {nombre_blancas}", True, BLACK)
             x = self.width - self.margin - txt.get_width()
             screen.blit(txt, (x, top_y))
+
+    # ------------------------------------------------------------------
+    def draw_win_overlay(self, screen, winner_text: str):
+        """Dibuja el panel final con el ganador."""
+        if not winner_text:
+            return
+        tablero_top = self.margin
+        tablero_bottom = self.height - self.message_bar_height - self.bottom_labels_band
+        overlay = pygame.Surface((self.width, self.height), pygame.SRCALPHA)
+        pygame.draw.rect(overlay, (0, 0, 0, 160), overlay.get_rect())
+        panel_w, panel_h = 520, 140
+        panel = pygame.Rect(0, 0, panel_w, panel_h)
+        panel.center = (self.width // 2, (tablero_top + tablero_bottom) // 2)
+        pygame.draw.rect(overlay, (245, 235, 210, 255), panel, border_radius=12)
+        pygame.draw.rect(overlay, BLACK, panel, 3, border_radius=12)
+        big = pygame.font.SysFont("arial", 32, bold=True)
+        txt = big.render(winner_text, True, BLACK)
+        small = pygame.font.SysFont("arial", 20)
+        sub = small.render("Presione ENTER o ESC para salir", True, BLACK)
+        overlay.blit(txt, (panel.centerx - txt.get_width() // 2, panel.y + 36))
+        overlay.blit(sub, (panel.centerx - sub.get_width() // 2, panel.y + 86))
+        screen.blit(overlay, (0, 0))

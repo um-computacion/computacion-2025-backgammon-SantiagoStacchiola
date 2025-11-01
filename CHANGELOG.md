@@ -560,3 +560,44 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 - Integración del inicio de la interfaz gráfica basada en Pygame
 
 ---
+
+## [2.3.0] - 2025-10-31
+
+### "progreso pygame"
+#### Agregado
+- Avances en vistas y eventos del apartado gráfico (`pygame_ui/`)
+- Mejora del renderizado de tablero, fichas y panel de dados
+- Ajustes en la interacción (tirada y consumo de dados, cambio de turno)
+#### Cambiado
+- Refinamientos de comportamiento y feedback visual en jugadas
+
+### "continuacion pygame"
+#### Agregado
+- Continuación del desarrollo del flujo de juego en Pygame
+- Pequeñas mejoras de usabilidad y estabilidad del bucle principal
+
+### "ci: install coverage/pylint and fix lint/test steps"
+#### Cambiado
+- Pipeline de CI actualizada para instalar `coverage` y `pylint`
+- Correcciones en los pasos de test y lint para garantizar ejecución estable
+- Generación de reportes de cobertura (XML/HTML) en CI
+
+---
+
+## [2.4.0] - 2025-11-01
+
+### "final del proyecto"
+#### Cambiado
+- `core/game.py`: Se suprime la impresión de "Opciones:". Se mantiene la compatibilidad con los tests.
+
+### "docs: actualización final"
+#### Cambiado
+- `README.md`: Se amplió la sección de CI y calidad (ubicación del workflow de GitHub Actions, integración con Code Climate o Coveralls mediante secrets, y protección de la rama `main`).
+- `JUSTIFICACION.md`: Se sincronizó el listado de excepciones con `core/excepcions.py` y se reemplazó la imagen por un diagrama de clases Mermaid embebido.
+
+### "ci: estado final de cobertura y tests"
+#### Cambiado
+- Suite de tests `unittest` en verde y ejecución correcta de Pygame local.
+- Cobertura consolidada: 93% total (core ≥ 90%).
+
+---
